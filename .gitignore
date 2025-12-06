@@ -1,3 +1,4 @@
 .vscode
 build
 .qtignore
+CMakeLists.txt.user
