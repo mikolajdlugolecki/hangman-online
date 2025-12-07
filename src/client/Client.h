@@ -1,23 +1,33 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+#include <QTcpSocket>
+#include <QTimer>
 #include <QWidget>
 
-QT_BEGIN_NAMESPACE
 namespace Ui {
 class Client;
 }
-QT_END_NAMESPACE
 
-class Client : public QWidget
-{
+class Client : public QWidget {
     Q_OBJECT
 
-public:
-    Client(QWidget *parent = nullptr);
+  public:
+    explicit Client(QWidget *parent = 0);
     ~Client();
 
-private:
+  protected:
+    QTcpSocket *socket = new QTcpSocket(this);
+    QTimer *connTimeoutTimer = new QTimer(this);
+    void connTimedOut();
+    void connectBtnHit();
+    void sendBtnHit();
+    void socketConnected();
+    void socketDisconnected();
+    void socketError();
+    void socketRead();
+
+  private:
     Ui::Client *ui;
 };
-#endif // CLIENT_H
+#endif
