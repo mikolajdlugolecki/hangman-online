@@ -1,3 +1,4 @@
+#include <csignal>
 #include <iostream>
 #include <cstdlib>
 #include <sys/socket.h>
@@ -6,14 +7,28 @@
 #include <cstring>
 #include <arpa/inet.h>
 #include <poll.h>
+#include <vector>
+#include "../common.h"
 
-#define MSG_SIZE 1024
+#define MSG_SIZE 4096
 #define MAX_CLIENTS 256
+
+namespace ReadState {
+	enum ReadStates {
+		READ_TYPE = 0,
+		READ_LENGTH,
+		READ_PAYLOAD,
+		NUM_OF_READ_STATES
+	};
+}
 
 struct Client{
 	int socket;
 	sockaddr_in address;
 	int closed;
+	int nextReadState = ReadState::READ_TYPE;
+	uint32_t incomingMessageLength;
+	std::vector<char> buffer;
 };
 
 int init_server(const char *port){
@@ -43,13 +58,13 @@ int init_server(const char *port){
 	return server_socket;
 }
 
-int main(int argc, char *argv[])
+int main(const int argc, char *argv[])
 {
 	if(argc != 2){
 		fprintf(stderr, "Usage: %s <port>\n", argv[0]);
 		return EXIT_FAILURE;
 	}
-	int server_socket = init_server(argv[1]);
+	const int server_socket = init_server(argv[1]);
 	Client clients[MAX_CLIENTS] = {};
 	int num_of_clients = 0;
 	pollfd pfds[MAX_CLIENTS+2] = {};
@@ -61,16 +76,16 @@ int main(int argc, char *argv[])
 		poll(pfds, MAX_CLIENTS+2, -1);
 		if(pfds[0].revents & POLLIN){
 			memset(&buffer, 0, MSG_SIZE);
-			int bytes_read = read(STDIN_FILENO, buffer, MSG_SIZE);
+			read(STDIN_FILENO, buffer, MSG_SIZE);
 			for(int i=0; i<num_of_clients; i++)
 				if(clients[i].closed == 0)
-					write(clients[i].socket, buffer, bytes_read);
+					construct_response(clients[i].socket, Response::GAME_STARTED, buffer);
 		}
 		if(pfds[1].revents & POLLIN){
 			memset(&buffer, 0, MSG_SIZE);
 			sockaddr_in client_address = {};
 			socklen_t s = sizeof(client_address);
-			int client_socket = accept(server_socket, (sockaddr*)&client_address, &s);
+			const int client_socket = accept(server_socket, (sockaddr*)&client_address, &s);
 			if(client_socket == -1){
 				fprintf(stderr, "Error accepting new client\n");
 				continue;
@@ -84,12 +99,43 @@ int main(int argc, char *argv[])
 		for(int i=2; i<num_of_clients+2; i++){
 			if(clients[i-2].closed == 0 && pfds[i].revents & POLLIN){
 				memset(&buffer, 0, MSG_SIZE);
-				if(read(clients[i-2].socket, buffer, MSG_SIZE) == 0){
+				const int bytes = read(clients[i-2].socket, buffer, MSG_SIZE);
+				clients[i-2].buffer.insert(clients[i-2].buffer.end(), buffer, buffer + bytes);
+				if(bytes == 0){
 					pfds[i].events = 0x0;
 					clients[i-2].closed = 1;
 					continue;
 				}
-				fprintf(stdout, "Message from %s:%d - %s", inet_ntoa(clients[i-2].address.sin_addr), ntohs(clients[i-2].address.sin_port), buffer);
+				while (true) {
+					if (clients[i-2].nextReadState == ReadState::READ_TYPE) {
+						if (clients[i-2].buffer.size() < 1) break;
+						auto type = static_cast<uint8_t>(clients[i-2].buffer[0]);
+						clients[i-2].buffer.erase(clients[i-2].buffer.begin());
+						clients[i-2].nextReadState = ReadState::READ_LENGTH;
+					}
+					if (clients[i-2].nextReadState == ReadState::READ_LENGTH) {
+						if (clients[i-2].buffer.size() < 4) break;
+						uint32_t length;
+						memcpy(&length, clients[i-2].buffer.data(), 4);
+						length = ntohl(length);
+						clients[i-2].incomingMessageLength = length;
+						clients[i-2].buffer.erase(clients[i-2].buffer.begin(), clients[i-2].buffer.begin() + 4);
+						clients[i-2].nextReadState = ReadState::READ_PAYLOAD;
+					}
+					if (clients[i-2].nextReadState == ReadState::READ_PAYLOAD) {
+						if (clients[i-2].buffer.size() < clients[i-2].incomingMessageLength) break;
+						std::vector<char> payload(
+						 clients[i-2].buffer.begin(),
+						 clients[i-2].buffer.begin() + clients[i-2].incomingMessageLength
+						);
+						clients[i-2].buffer.erase(clients[i-2].buffer.begin(),
+						clients[i-2].buffer.begin() + clients[i-2].incomingMessageLength);
+						std::string text(payload.begin(), payload.end());
+						fprintf(stdout, "Message from %s:%d - %s\n", inet_ntoa(clients[i-2].address.sin_addr), ntohs(clients[i-2].address.sin_port), text.c_str());
+						clients[i-2].nextReadState = ReadState::READ_TYPE;
+						clients[i-2].incomingMessageLength = 0;
+					}
+				}
 			}
 		}
 	}

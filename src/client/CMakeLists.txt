@@ -10,6 +10,8 @@ qt_add_executable(Client
     Client.cpp
     Client.h
     Client.ui
+        ../common.cpp
+        ../common.h
 )
 
 target_link_libraries(Client

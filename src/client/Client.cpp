@@ -53,17 +53,70 @@ void Client::socketError() {
 }
 
 void Client::socketRead() {
-    QByteArray message = socket->readAll();
-    ui->msgsTextEdit->append(QString::fromUtf8(message).trimmed());
+    this->buffer.append(socket->readAll());
+    while(true){
+        switch(this->readState){
+        case ReadState::READ_TYPE:{
+            if (this->buffer.size() < 1) return;
+            uint8_t type = static_cast<uint8_t>(this->buffer[0]);
+            this->buffer.remove(0, 1);
+            switch(type){
+            case Response::GAME_STARTED:
+                break;
+            case Response::GAME_STATE:
+                break;
+            case Response::GAME_SUMMARY:
+                break;
+            case Response::PING:
+                break;
+            case Response::REAUTH:
+                break;
+            case Response::ROOM_CREATED:
+                break;
+            default:
+                break;
+            }
+            this->readState = ReadState::READ_LENGTH;
+            break;}
+        case ReadState::READ_LENGTH:{
+            if (this->buffer.size() < 4) return;
+            uint32_t length;
+            memcpy(&length, this->buffer.constData(), 4);
+            length = ntohl(length);
+            this->buffer.remove(0, 4);
+            this->incomingMessageLength = length;
+            this->readState = ReadState::READ_PAYLOAD;
+            break;}
+        case ReadState::READ_PAYLOAD:{
+            if (this->buffer.size() < static_cast<int>(this->incomingMessageLength)) return;
+            QByteArray payload = this->buffer.left(this->incomingMessageLength);
+            this->buffer.remove(0, this->incomingMessageLength);
+            ui->msgsTextEdit->append(QString::fromUtf8(payload).trimmed());
+            this->incomingMessageLength = 0;
+            this->readState = ReadState::READ_TYPE;
+            break;}
+        }
+    }
     ui->msgsTextEdit->setAlignment(Qt::AlignLeft);
 }
 
 void Client::sendBtnHit() {
     QString txt = ui->msgLineEdit->text().trimmed();
-    QByteArray txtAsUtf8 = (txt + '\n').toUtf8();
-    socket->write(txtAsUtf8);
+    QByteArray txtAsUtf8 = txt.toUtf8();
+    this->construct_request(Request::CREATE_ROOM, txtAsUtf8);
     ui->msgsTextEdit->append(txt);
     ui->msgsTextEdit->setAlignment(Qt::AlignRight);
     ui->msgLineEdit->clear();
     ui->msgLineEdit->setFocus();
+}
+
+int Client::construct_request(const Request::Type type, const QByteArray payload) {
+    QByteArray packet;
+    uint8_t raw_type = static_cast<uint8_t>(type);
+    packet.append(static_cast<char>(raw_type));
+    uint32_t raw_size = htonl(static_cast<uint32_t>(payload.size()));
+    packet.append(reinterpret_cast<const char*>(&raw_size), 4);
+    packet.append(payload);
+    socket->write(packet);
+    return 0;
 }
