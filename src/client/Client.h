@@ -4,17 +4,7 @@
 #include <QTcpSocket>
 #include <QTimer>
 #include <QWidget>
-#include "../common.h"
-#include <stdint.h>
-
-namespace ReadState{
-enum ReadStates {
-    READ_TYPE = 0,
-    READ_LENGTH,
-    READ_PAYLOAD,
-    NUM_OF_READ_STATES
-};
-}
+#include "../common/Parser.h"
 
 namespace Ui {
 class Client;
@@ -31,8 +21,6 @@ class Client : public QWidget {
     QTcpSocket *socket = new QTcpSocket(this);
     QTimer *connTimeoutTimer = new QTimer(this);
     QByteArray buffer;
-    int readState = ReadState::READ_TYPE;
-    uint32_t incomingMessageLength = 0;
     void connTimedOut();
     void connectBtnHit();
     void sendBtnHit();
@@ -40,9 +28,9 @@ class Client : public QWidget {
     void socketDisconnected();
     void socketError();
     void socketRead();
+    Parser *parser;
 
   private:
     Ui::Client *ui;
-    int construct_request(Request::Type type, const QByteArray payload);
 };
 #endif

@@ -1,9 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
-
-#include <string>
-#include <unistd.h>
-#include <arpa/inet.h>
+#ifndef MESSAGETYPE_H
+#define MESSAGETYPE_H
 
 namespace Request {
     enum Type {             // PAYLOADS:
@@ -34,7 +30,5 @@ namespace Response {
         NUM_OF_RESPONSES
     };
 }
-
-int construct_response(int socket, Response::Type type, const std::string& payload);
 
 #endif

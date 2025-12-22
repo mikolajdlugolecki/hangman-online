@@ -10,8 +10,13 @@ qt_add_executable(Client
     Client.cpp
     Client.h
     Client.ui
-        ../common.cpp
-        ../common.h
+        ../common/MessageType.h
+        ../common/Message.h
+        ../common/Serializer.cpp
+        ../common/Serializer.h
+        ../common/Parser.cpp
+        ../common/Parser.h
+        ../common/Constants.h
 )
 
 target_link_libraries(Client
