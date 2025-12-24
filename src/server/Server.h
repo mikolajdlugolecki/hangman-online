@@ -6,9 +6,9 @@
 #include <netinet/in.h>
 #include <sys/poll.h>
 
-#include "network/Client.h"
-#include "Parser.h"
+#include "Client.h"
 #include "MessageType.h"
+#include "Parser.h"
 
 class Server {
 private:

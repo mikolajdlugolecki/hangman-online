@@ -1,5 +1,9 @@
 #include "TcpClient.h"
 
+#include "Message.h"
+#include "MessageType.h"
+#include "Serializer.h"
+
 TcpClient::TcpClient(QObject *parent)
     : QObject{parent}
 {

@@ -5,10 +5,7 @@
 #include <QTcpSocket>
 #include <QTimer>
 
-#include "../../include/common/Message.h"
-#include "../../include/common/MessageType.h"
-#include "../../include/common/Parser.h"
-#include "../../include/common/Serializer.h"
+#include "Parser.h"
 
 class TcpClient : public QObject
 {

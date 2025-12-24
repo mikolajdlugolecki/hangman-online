@@ -1,4 +1,4 @@
-#include "network/Client.h"
+#include "Client.h"
 
 Client::Client(const int in_socket, const sockaddr_in in_address) {
     this->socket = in_socket;

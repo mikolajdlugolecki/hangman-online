@@ -22,7 +22,6 @@ private:
     ConnectWidget* ConnectScene;
     LoginWidget* LoginScene;
     LobbyWidget* LobbyScene;
-    // GameWidget* game;
 
 signals:
 };

@@ -3,17 +3,14 @@ project(server)
 
 set(CMAKE_CXX_STANDARD 17)
 
-
-file(GLOB_RECURSE SERVER_SOURCES
-        core/*.cpp
-        logic/*.cpp
-        network/*.cpp
-        ../common/*.cpp
+file(GLOB SERVER_SOURCES
+    *.cpp
+    ../common/*.cpp
 )
 
 file(GLOB_RECURSE SERVER_HEADERS
-        include/server/**/*.h
-        include/common/*.h
+        *.h
+        ../common/*.h
 )
 
 add_executable(server
@@ -22,6 +19,7 @@ add_executable(server
 )
 
 target_include_directories(server PRIVATE
-        ${CMAKE_SOURCE_DIR}/include/server
-        ${CMAKE_SOURCE_DIR}/include/common
+        ../common
 )
+
+target_compile_options(server PRIVATE -Wall -Wextra -g)

@@ -5,24 +5,49 @@ find_package(Qt6 6 REQUIRED COMPONENTS Core Widgets Network)
 
 qt_standard_project_setup()
 
-qt_add_executable(Client
-    main.cpp
-    ConnectWidget.cpp
-    ConnectWidget.h
-    ConnectWidget.ui
-        ../../include/common/MessageType.h
-        ../../include/common/Message.h
-        ../common/Serializer.cpp
-        ../../include/common/Serializer.h
+set(CLIENT_SOURCES
+        main.cpp
+
+        TcpClient.cpp
+
+        MainWindow.cpp
+        ConnectWidget.cpp
+        LobbyWidget.cpp
+        LoginWidget.cpp
+
         ../common/Parser.cpp
-        ../../include/common/Parser.h
-        ../../include/common/Constants.h
-        MainWindow.h MainWindow.cpp
-        LoginWidget.ui
-        LoginWidget.h LoginWidget.cpp
+        ../common/Serializer.cpp
+)
+
+set(CLIENT_HEADERS
+        TcpClient.h
+
+        MainWindow.h
+        ConnectWidget.h
+        LobbyWidget.h
+        LoginWidget.h
+
+        ../common/Parser.h
+        ../common/Serializer.h
+        ../common/Constants.h
+        ../common/Message.h
+        ../common/MessageType.h
+)
+
+set(CLIENT_UI
+        ConnectWidget.ui
         LobbyWidget.ui
-        LobbyWidget.h LobbyWidget.cpp
-        TcpClient.h TcpClient.cpp
+        LoginWidget.ui
+)
+
+qt_add_executable(Client
+        ${CLIENT_SOURCES}
+        ${CLIENT_HEADERS}
+        ${CLIENT_UI}
+)
+
+target_include_directories(Client PRIVATE
+        ../common
 )
 
 target_link_libraries(Client

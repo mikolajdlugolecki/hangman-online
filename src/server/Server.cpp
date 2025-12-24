@@ -1,4 +1,4 @@
-#include "network/Server.h"
+#include "Server.h"
 
 #include <iostream>
 #include <cstdlib>
