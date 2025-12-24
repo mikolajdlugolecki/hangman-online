@@ -1,5 +1,6 @@
-#include "Server.h"
 #include <iostream>
+
+#include "network/Server.h"
 
 int main(const int argc, char *argv[])
 {

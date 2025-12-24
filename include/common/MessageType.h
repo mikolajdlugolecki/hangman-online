@@ -27,6 +27,8 @@ namespace Response {
         GAME_SUMMARY,		// player1:points|player2:...
         PING,				// *empty*
         REAUTH,				// pin
+        LOGIN_OK,           // *empty*
+        LOGIN_FAILED,       // error
         NUM_OF_RESPONSES
     };
 }

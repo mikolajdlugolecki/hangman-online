@@ -7,16 +7,22 @@ qt_standard_project_setup()
 
 qt_add_executable(Client
     main.cpp
-    Client.cpp
-    Client.h
-    Client.ui
-        ../common/MessageType.h
-        ../common/Message.h
+    ConnectWidget.cpp
+    ConnectWidget.h
+    ConnectWidget.ui
+        ../../include/common/MessageType.h
+        ../../include/common/Message.h
         ../common/Serializer.cpp
-        ../common/Serializer.h
+        ../../include/common/Serializer.h
         ../common/Parser.cpp
-        ../common/Parser.h
-        ../common/Constants.h
+        ../../include/common/Parser.h
+        ../../include/common/Constants.h
+        MainWindow.h MainWindow.cpp
+        LoginWidget.ui
+        LoginWidget.h LoginWidget.cpp
+        LobbyWidget.ui
+        LobbyWidget.h LobbyWidget.cpp
+        TcpClient.h TcpClient.cpp
 )
 
 target_link_libraries(Client

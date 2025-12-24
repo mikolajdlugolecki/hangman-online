@@ -2,3 +2,4 @@
 build
 .qtignore
 CMakeLists.txt.user
+.idea
