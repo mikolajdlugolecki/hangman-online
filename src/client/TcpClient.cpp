@@ -3,6 +3,7 @@
 #include "Message.h"
 #include "MessageType.h"
 #include "Serializer.h"
+#include <sys/socket.h>
 
 TcpClient::TcpClient(QObject *parent)
     : QObject{parent}
@@ -43,18 +44,36 @@ void TcpClient::onReadyRead(){
             break;
         case Response::LOGIN_FAILED:
             emit nicknameError(QString::fromStdString(message->payload));
+            break;
+        case Response::ROOM_CREATED:{
+            std::vector<std::string> result = parser->split_message(message->payload);
+            std::string room_id = result[0];
+            std::string room_pin = result[1];
+            emit roomCreated(QString::fromStdString(room_id), QString::fromStdString(room_pin));
+            break;}
+        case Response::ROOM_OK:
+            emit roomOK();
+            break;
+        case Response::ROOM_FAILED:
+            emit roomError(QString::fromStdString(message->payload));
         }
     }
     delete message;
 }
 
-void TcpClient::nicknameReceived(const QString& nickname){
-    // send request to server
+void TcpClient::sendMessage(Request::Type type, const QString& payload){
     Message *message = new Message();
-    message->type = Request::LOGIN;
-    message->length = nickname.length();
-    message->payload = nickname.toStdString();
+    message->type = type;
+    message->length = payload.length();
+    message->payload = payload.toStdString();
     auto buf = Serializer::serialize(*message);
     socket->write(QByteArray::fromRawData(buf.data(), buf.size()));
     delete message;
 }
+
+void TcpClient::nicknameReceived(const QString& nickname){ sendMessage(Request::LOGIN, nickname); }
+
+void TcpClient::createRoomReceived(){ sendMessage(Request::CREATE_ROOM, ""); }
+
+void TcpClient::joinRoomReceived(const QString& room_id, const QString& room_pin){ sendMessage(Request::JOIN_ROOM, room_id + "|" + room_pin); }
+

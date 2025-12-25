@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <string>
+#include <sstream>
 #include <netinet/in.h>
 #include "Constants.h"
 
@@ -35,4 +36,14 @@ bool Parser::parse(std::vector<char> &buffer, Message *out) {
         }
         return true;
     }
+}
+
+std::vector<std::string> Parser::split_message(const std::string& payload) {
+    std::vector<std::string> result;
+    std::string token;
+    std::stringstream ss(payload);
+    while (std::getline(ss, token, '|')) {
+        result.push_back(token);
+    }
+    return result;
 }

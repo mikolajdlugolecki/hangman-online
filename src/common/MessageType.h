@@ -19,7 +19,11 @@ namespace Request {
 
 namespace Response {
     enum Type {             // PAYLOADS:
-        ROOM_CREATED = 0,	// room_id|pin
+        LOGIN_OK = 0,       // *empty*
+        LOGIN_FAILED,       // error
+        ROOM_CREATED,	    // room_id|pin
+        ROOM_OK,            // *empty*
+        ROOM_FAILED,        // error
         ROOM_UPDATE,		// player1:status:errors:points|player2:...
         GAME_STARTED,		// word_length|max_errors|max_limit
         GAME_STATE,			// masked_word|errors_left|time_left
@@ -27,8 +31,6 @@ namespace Response {
         GAME_SUMMARY,		// player1:points|player2:...
         PING,				// *empty*
         REAUTH,				// pin
-        LOGIN_OK,           // *empty*
-        LOGIN_FAILED,       // error
         NUM_OF_RESPONSES
     };
 }

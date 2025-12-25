@@ -7,7 +7,7 @@
 #include "TcpClient.h"
 #include "ConnectWidget.h"
 #include "LoginWidget.h"
-#include "LobbyWidget.h"
+#include "MenuWidget.h"
 
 class MainWindow : public QMainWindow
 {
@@ -21,7 +21,7 @@ private:
 
     ConnectWidget* ConnectScene;
     LoginWidget* LoginScene;
-    LobbyWidget* LobbyScene;
+    MenuWidget* MenuScene;
 
 signals:
 };

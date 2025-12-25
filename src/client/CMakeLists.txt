@@ -11,9 +11,10 @@ set(CLIENT_SOURCES
         TcpClient.cpp
 
         MainWindow.cpp
+
         ConnectWidget.cpp
-        LobbyWidget.cpp
         LoginWidget.cpp
+        MenuWidget.cpp
 
         ../common/Parser.cpp
         ../common/Serializer.cpp
@@ -23,9 +24,10 @@ set(CLIENT_HEADERS
         TcpClient.h
 
         MainWindow.h
+
         ConnectWidget.h
-        LobbyWidget.h
         LoginWidget.h
+        MenuWidget.h
 
         ../common/Parser.h
         ../common/Serializer.h
@@ -36,8 +38,8 @@ set(CLIENT_HEADERS
 
 set(CLIENT_UI
         ConnectWidget.ui
-        LobbyWidget.ui
         LoginWidget.ui
+        MenuWidget.ui
 )
 
 qt_add_executable(Client
