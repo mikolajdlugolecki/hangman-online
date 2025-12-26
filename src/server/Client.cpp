@@ -9,3 +9,8 @@ Client::Client(const int in_socket, const sockaddr_in in_address) {
 Client::~Client() {
     delete message;
 }
+
+std::string Client::address_to_string()
+{
+    return std::string(inet_ntoa(this->address.sin_addr)) + ":" + std::to_string(ntohs(this->address.sin_port));   
+}

@@ -9,23 +9,33 @@
 #include "Client.h"
 #include "MessageType.h"
 #include "Parser.h"
+#include "Room.h"
 
 class Server {
 private:
     int socket{};
     sockaddr_in address{};
+    Parser *parser;
+
     std::vector<std::unique_ptr<Client>> clients;
     std::vector<pollfd> pfds;
-    Parser *parser;
+    std::vector<std::unique_ptr<Room>> rooms;
+    
     void accept_new_client();
     void handle_client(size_t client_index);
     void handle_message(Client* client, Message* message);
-    void send_message(const Client* client, Response::Type type, const std::string& payload);
     bool validate_nickname(Client* client, const std::string& nickname);
+    void create_new_room(Client *client);
+    void join_room(Client *client, std::string id, std::string pin);
+    Room* find_room(std::string id);
+
 public:
     Server(int port);
     void run();
     ~Server();
+
+    void send_message(const Client* client, Response::Type type, const std::string& payload);
+    void write_debug_log(Client *client, std::string message);
 };
 
 #endif

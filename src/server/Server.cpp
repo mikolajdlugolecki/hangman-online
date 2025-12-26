@@ -67,7 +67,7 @@ void Server::accept_new_client() {
 	pfd.events = POLLIN;
 	this->clients.push_back(std::make_unique<Client>(client_socket, client_address));
 	this->pfds.push_back(pfd);
-	std::cout << "Accepted new client - " << inet_ntoa(client_address.sin_addr) << ":" << ntohs(client_address.sin_port) << std::endl;
+	write_debug_log(clients.back().get(), "New client accepted");
 }
 
 void Server::handle_client(const size_t client_index) {
@@ -80,14 +80,14 @@ void Server::handle_client(const size_t client_index) {
 		
 		if(bytes == 0){
 			close(client->socket);
-			std::cout << "Client disconnected - " << inet_ntoa(client->address.sin_addr) << ":" << ntohs(client->address.sin_port) << std::endl;
+			std::cout << "Client disconnected - " << client->address_to_string() << std::endl;
 			this->clients.erase(this->clients.begin() + client_index - 1);
 			this->pfds.erase(this->pfds.begin() + client_index);
 			return;
 		}
 
 		while (this->parser->parse(client->buffer, client->message)) {
-			std::cout << "Message from " << inet_ntoa(client->address.sin_addr) << ":" << ntohs(client->address.sin_port) << " - " << client->message->payload << std::endl;
+			write_debug_log(client, "Message received. type = " + std::to_string(client->message->type) + " Payload " + client->message->payload);
 			// auto buf = Serializer::serialize(*client->message);
 			// for (unsigned char c : buf)
 			// 	std::cout << std::hex << (int)c << " ";
@@ -97,6 +97,49 @@ void Server::handle_client(const size_t client_index) {
 	}
 }
 
+void Server::write_debug_log(Client *client, std::string message) {
+	std::cout << client->address_to_string() << " --- " << message << std::endl;
+}
+
+Room* Server::find_room(std::string id) {
+	for(auto &room : this->rooms) {
+		if(room->id == id) {
+			return room.get();
+		}
+	}
+	return nullptr;
+}
+
+void Server::create_new_room(Client *client)
+{
+	auto room = std::make_unique<Room>(this, client);
+	this->send_message(client, Response::ROOM_CREATED, room->id + "|" + room->pin);
+	write_debug_log(client, "Room created ID = " + room->id + " PIN = " + room->pin);
+	this->rooms.push_back(std::move(room));
+}
+
+void Server::join_room(Client *client, std::string id, std::string pin)
+{
+	auto room = find_room(id);
+
+	if(room == nullptr) {
+		this->send_message(client, Response::ROOM_FAILED, "Room not found. Wrong room id.");
+		write_debug_log(client, "Room not found ID = " + room->id);
+		return;
+	}
+
+	if(pin != room->pin) {
+		this->send_message(client, Response::ROOM_FAILED, "Wrong pin!");
+		write_debug_log(client, "Wrong room pin ID = " + room->id);
+		return;
+	}
+
+	room->join(client);
+
+	this->send_message(client, Response::ROOM_OK, "");
+	write_debug_log(client, "Joined room ID = " + room->id);
+}
+
 void Server::handle_message(Client *client, Message *message) {
 	switch (message->type) {
 		case Request::LOGIN:
@@ -104,6 +147,16 @@ void Server::handle_message(Client *client, Message *message) {
 				this->send_message(client, Response::LOGIN_OK, "");
 			else
 				this->send_message(client, Response::LOGIN_FAILED, "Nickname is already taken");
+			break;
+		case Request::CREATE_ROOM:
+			create_new_room(client);
+			break;
+		case Request::JOIN_ROOM: {
+			std::vector<std::string> result = parser->split_message(message->payload);
+            std::string room_id = result[0];
+            std::string room_pin = result[1];
+			join_room(client, room_id, room_pin);
+		}
 			break;
 		default:
 			break;

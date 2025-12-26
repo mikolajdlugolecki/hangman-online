@@ -1,6 +1,7 @@
 #ifndef MESSAGETYPE_H
 #define MESSAGETYPE_H
 
+//sent by client
 namespace Request {
     enum Type {             // PAYLOADS:
         LOGIN = 0,			// nick
@@ -17,6 +18,7 @@ namespace Request {
     };
 }
 
+//send by server
 namespace Response {
     enum Type {             // PAYLOADS:
         LOGIN_OK = 0,       // *empty*
@@ -24,6 +26,7 @@ namespace Response {
         ROOM_CREATED,	    // room_id|pin
         ROOM_OK,            // *empty*
         ROOM_FAILED,        // error
+        ROOM_USERS_LIST,    // player1_nick|player2_nick...
         ROOM_UPDATE,		// player1:status:errors:points|player2:...
         GAME_STARTED,		// word_length|max_errors|max_limit
         GAME_STATE,			// masked_word|errors_left|time_left

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "Message.h"
 
@@ -15,6 +16,8 @@ public:
     std::string nickname;
     Client(int in_socket, sockaddr_in in_address);
     ~Client();
+
+    std::string address_to_string();
 };
 
 #endif
