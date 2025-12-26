@@ -37,6 +37,7 @@ void TcpClient::onReadyRead(){
     QByteArray data = socket->readAll();
     buffer.insert(buffer.end(), data.begin(), data.end());
     Message* message = new Message();
+    
     while(this->parser->parse(buffer, message)){
         switch(message->type){
         case Response::LOGIN_OK:

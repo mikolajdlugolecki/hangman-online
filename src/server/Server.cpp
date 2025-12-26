@@ -14,26 +14,30 @@
 Server::Server(const int port) {
 	this->socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if(this->socket == -1){
-		std::cerr << "Error creating socket" << std::endl;
+		perror("Error creating socket");
 		exit(EXIT_FAILURE);
 	}
+
 	const int one = 1;
 	if(setsockopt(this->socket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) == -1){
-		std::cerr << "Error chaning socket options" << std::endl;
+		perror("Error chaning socket options");
 		exit(EXIT_FAILURE);
 	}
+
 	this->address = {};
 	this->address.sin_family = AF_INET;
 	this->address.sin_addr.s_addr = htonl(INADDR_ANY);
 	this->address.sin_port = htons(port);
 	if(bind(this->socket, reinterpret_cast<sockaddr *>(&this->address), sizeof(this->address)) == -1){
-		std::cerr << "Error binding address to a socket" << std::endl;
+		perror("Error binding address to a socket");
 		exit(EXIT_FAILURE);
 	}
+
 	if(listen(this->socket, SOMAXCONN) == -1){
-		std::cerr << "Error marking server socket as a listening socket" << std::endl;
+		perror("Error marking server socket as a listening socket");
 		exit(EXIT_FAILURE);
 	}
+
 	pollfd pfd{};
 	pfd.fd = this->socket;
 	pfd.events = POLLIN;
@@ -51,11 +55,13 @@ Server::~Server() {
 void Server::accept_new_client() {
 	sockaddr_in client_address = {};
 	socklen_t s = sizeof(client_address);
+	
 	const int client_socket = accept(this->socket, reinterpret_cast<sockaddr *>(&client_address), &s);
 	if(client_socket == -1){
-		std::cerr << "Error accepting new client" << std::endl;
+		perror("Error accepting new client");
 		return;
 	}
+
 	pollfd pfd{};
 	pfd.fd = client_socket;
 	pfd.events = POLLIN;
@@ -71,6 +77,7 @@ void Server::handle_client(const size_t client_index) {
 		Client *client = this->clients[client_index - 1].get();
 		const size_t bytes = read(client->socket, buffer, MSG_SIZE);
 		client->buffer.insert(client->buffer.end(), buffer, buffer + bytes);
+		
 		if(bytes == 0){
 			close(client->socket);
 			std::cout << "Client disconnected - " << inet_ntoa(client->address.sin_addr) << ":" << ntohs(client->address.sin_port) << std::endl;
@@ -78,6 +85,7 @@ void Server::handle_client(const size_t client_index) {
 			this->pfds.erase(this->pfds.begin() + client_index);
 			return;
 		}
+
 		while (this->parser->parse(client->buffer, client->message)) {
 			std::cout << "Message from " << inet_ntoa(client->address.sin_addr) << ":" << ntohs(client->address.sin_port) << " - " << client->message->payload << std::endl;
 			// auto buf = Serializer::serialize(*client->message);
