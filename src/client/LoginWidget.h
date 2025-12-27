@@ -2,6 +2,7 @@
 #define LOGINWIDGET_H
 
 #include <QWidget>
+#include "GameState.h"
 
 namespace Ui {
 class LoginWidget;

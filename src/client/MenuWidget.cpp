@@ -23,9 +23,14 @@ void MenuWidget::roomCreated(const QString& room_id, const QString& room_pin){
 }
 
 void MenuWidget::joinRoomBtnHit(){
-    QString room_id = ui->roomIdLineEdit->text();
-    QString room_pin = ui->roomPinLineEdit->text();
-    emit joinRoomRequested(room_id, room_pin);
+    QString roomId = ui->roomIdLineEdit->text();
+    QString roomPin = ui->roomPinLineEdit->text();
+
+    GameState::instance().roomId = roomId;
+    GameState::instance().roomPin = roomPin;
+    GameState::instance().isRoomOwner = false;
+
+    emit joinRoomRequested(roomId, roomPin);
 }
 
 void MenuWidget::validateData(){

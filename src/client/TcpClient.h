@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QTcpSocket>
 #include <QTimer>
+#include <QVector>
 
 #include "Parser.h"
 #include "MessageType.h"
@@ -38,6 +39,7 @@ signals:
     void roomCreated(const QString room_id, const QString room_pin);
     void roomOK();
     void roomError(const QString error);
+    void updateLobbyPlayerList(const QVector<QString> nicknames);
 };
 
 #endif // TCPCLIENT_H

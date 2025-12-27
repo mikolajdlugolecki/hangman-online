@@ -17,6 +17,8 @@ void LoginWidget::loginBtnHit(){
         QMessageBox::critical(this, "Error", "Nickname must be at least 3 characters long");
         return;
     }
+
+    GameState::instance().usersNickname = nickname;
     emit nicknameSent(nickname);
 }
 

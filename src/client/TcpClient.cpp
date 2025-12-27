@@ -33,6 +33,17 @@ void TcpClient::onDisconnected(){
 
 }
 
+static QVector<QString> stdVectorToQVector(const std::vector<std::string> &stdStrings) {
+    QVector<QString> qStrings;
+    qStrings.reserve(static_cast<int>(stdStrings.size())); // optional, for efficiency
+
+    for (const auto &s : stdStrings) {
+        qStrings.append(QString::fromStdString(s));
+    }
+
+    return qStrings;
+}
+
 void TcpClient::onReadyRead(){
     QByteArray data = socket->readAll();
     buffer.insert(buffer.end(), data.begin(), data.end());
@@ -57,6 +68,10 @@ void TcpClient::onReadyRead(){
             break;
         case Response::ROOM_FAILED:
             emit roomError(QString::fromStdString(message->payload));
+            break;
+        case Response::ROOM_USERS_LIST:
+            std::vector<std::string> result = parser->split_message(message->payload);
+            emit updateLobbyPlayerList(stdVectorToQVector(result));
         }
     }
     delete message;

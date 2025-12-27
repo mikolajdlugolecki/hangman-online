@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "GameState.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow{parent}
@@ -14,10 +15,12 @@ MainWindow::MainWindow(QWidget *parent)
     ConnectScene = new ConnectWidget(this);
     LoginScene = new LoginWidget(this);
     MenuScene = new MenuWidget(this);
+    LobbyScene = new LobbyWidget(this);
 
     stack->addWidget(ConnectScene);
     stack->addWidget(LoginScene);
     stack->addWidget(MenuScene);
+    stack->addWidget(LobbyScene);
 
     stack->setCurrentWidget(ConnectScene);
 
@@ -36,13 +39,21 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     connect(MenuScene, &MenuWidget::createRoomRequested, client, &TcpClient::createRoomReceived);
-    connect(client, &TcpClient::roomCreated, MenuScene, &MenuWidget::roomCreated);
     connect(MenuScene, &MenuWidget::joinRoomRequested, client, &TcpClient::joinRoomReceived);
     connect(client, &TcpClient::roomError, MenuScene, &MenuWidget::roomError);
 
-    connect(client, &TcpClient::roomOK, this, [this](){
-        // go to next screen
+    connect(client, &TcpClient::roomCreated, this, [this](const QString roomId, const QString roomPin) {
+        GameState::instance().roomId = roomId;
+        GameState::instance().roomPin = roomPin;
+        GameState::instance().isRoomOwner = true;
+        GameState::instance().roomPlayers.push_back(GameState::instance().usersNickname);
+
+        stack->setCurrentWidget(LobbyScene);
     });
 
-    // handle roomCreated signal: capture OK button clicked in pop up and then redirect to new screen if possible, otherwise delete pop up and redirect immediately
+    connect(client, &TcpClient::roomOK, this, [this](){
+        stack->setCurrentWidget(LobbyScene);
+    });
+
+    connect(client, &TcpClient::updateLobbyPlayerList, LobbyScene, &LobbyWidget::updateLobbyPlayerList);
 }

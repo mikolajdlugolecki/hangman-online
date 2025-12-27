@@ -46,6 +46,8 @@ qt_add_executable(Client
         ${CLIENT_SOURCES}
         ${CLIENT_HEADERS}
         ${CLIENT_UI}
+        LobbyWidget.h LobbyWidget.cpp LobbyWidget.ui
+        GameState.h GameState.cpp
 )
 
 target_include_directories(Client PRIVATE
