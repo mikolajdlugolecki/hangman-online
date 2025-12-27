@@ -21,7 +21,7 @@ void TcpClient::connectToServer(const QString& host, quint16 port){
 }
 
 void TcpClient::onConnected(){
-    timer->disconnect();
+    timer->stop();
     emit connected();
 }
 
@@ -30,7 +30,7 @@ void TcpClient::onTimeout(){
 }
 
 void TcpClient::onDisconnected(){
-
+    emit connectionLost();
 }
 
 static QVector<QString> stdVectorToQVector(const std::vector<std::string> &stdStrings) {
@@ -69,9 +69,19 @@ void TcpClient::onReadyRead(){
         case Response::ROOM_FAILED:
             emit roomError(QString::fromStdString(message->payload));
             break;
-        case Response::ROOM_USERS_LIST:
+        case Response::ROOM_OWNERSHIP_TRANSFER:
+            emit roomOwnerShipTransfer();
+            break;
+        case Response::ROOM_USERS_LIST:{
             std::vector<std::string> result = parser->split_message(message->payload);
             emit updateLobbyPlayerList(stdVectorToQVector(result));
+            break;}
+        case Response::GAME_STARTED:{
+            std::vector<std::string> result = parser->split_message(message->payload);
+            std::string word_length = result[0];
+            std::string max_errors = result[1];
+            emit gameStarted(QString::fromStdString(word_length), QString::fromStdString(max_errors));
+            break;}
         }
     }
     delete message;
@@ -93,3 +103,6 @@ void TcpClient::createRoomReceived(){ sendMessage(Request::CREATE_ROOM, ""); }
 
 void TcpClient::joinRoomReceived(const QString& room_id, const QString& room_pin){ sendMessage(Request::JOIN_ROOM, room_id + "|" + room_pin); }
 
+void TcpClient::leaveRoomReceived(){ sendMessage(Request::LEAVE_ROOM, ""); }
+
+void TcpClient::startGameReceived(){ sendMessage(Request::START_GAME, ""); };

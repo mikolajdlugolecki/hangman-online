@@ -1,8 +1,9 @@
 #ifndef SERIALIZER_H
 #define SERIALIZER_H
 
-#include "Message.h"
 #include <vector>
+
+#include "Message.h"
 
 class Serializer {
 public:

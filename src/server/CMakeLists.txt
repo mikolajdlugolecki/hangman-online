@@ -4,13 +4,21 @@ project(server)
 set(CMAKE_CXX_STANDARD 17)
 
 file(GLOB SERVER_SOURCES
-    *.cpp
-    ../common/*.cpp
+        *.cpp
+        ../common/*.cpp
 )
 
 file(GLOB_RECURSE SERVER_HEADERS
         *.h
         ../common/*.h
+)
+
+file(GLOB RESOURCE_FILES
+        ../../resources/*
+)
+
+file(COPY ${RESOURCE_FILES}
+        DESTINATION ${CMAKE_BINARY_DIR}
 )
 
 add_executable(server

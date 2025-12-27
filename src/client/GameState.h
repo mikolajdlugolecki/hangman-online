@@ -19,6 +19,10 @@ public:
     QString roomPin;
     bool isRoomOwner;
     QVector<QString> roomPlayers;
+    QString word_length;
+    int current_errors;
+    QString max_errors;
+    QString word;
 
 private:
     GameState();

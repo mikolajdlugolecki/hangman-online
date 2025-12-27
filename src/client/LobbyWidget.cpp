@@ -1,11 +1,15 @@
 #include "LobbyWidget.h"
 #include "ui_LobbyWidget.h"
 
+#include <QMessageBox>
+
 LobbyWidget::LobbyWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::LobbyWidget)
 {
     ui->setupUi(this);
+    connect(ui->leaveRoomButton, &QPushButton::clicked, this, &LobbyWidget::leaveRoomButtonHit);
+    connect(ui->startGameButton, &QPushButton::clicked, this, &LobbyWidget::startGameButtonHit);
 }
 
 LobbyWidget::~LobbyWidget()
@@ -24,6 +28,12 @@ void LobbyWidget::showEvent(QShowEvent *event)
     updateLobbyPlayerList(GameState::instance().roomPlayers);
 }
 
+void LobbyWidget::lobbyOwnerShipReceived(){
+    GameState::instance().isRoomOwner = true;
+    ui->startGameButton->setVisible(true);
+    QMessageBox::information(this, "Info", "You are now a new owner of this room");
+}
+
 void LobbyWidget::updateLobbyPlayerList(QVector<QString> nicknames) {
     ui->listWidget->clear();
     GameState::instance().roomPlayers.clear();
@@ -32,3 +42,7 @@ void LobbyWidget::updateLobbyPlayerList(QVector<QString> nicknames) {
         ui->listWidget->addItem(nick);
     }
 }
+
+void LobbyWidget::leaveRoomButtonHit(){ emit leaveRoomRequested(); }
+
+void LobbyWidget::startGameButtonHit(){ emit startGameRequested(); }

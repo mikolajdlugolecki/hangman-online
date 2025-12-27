@@ -16,6 +16,7 @@ class ConnectWidget : public QWidget {
     explicit ConnectWidget(QWidget *parent = 0);
     ~ConnectWidget();
     void connTimedOut();
+    void connLost();
 
   protected:
     void connectBtnHit();

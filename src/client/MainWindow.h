@@ -9,6 +9,7 @@
 #include "LoginWidget.h"
 #include "MenuWidget.h"
 #include "LobbyWidget.h"
+#include "GameWidget.h"
 
 class MainWindow : public QMainWindow
 {
@@ -23,7 +24,8 @@ private:
     ConnectWidget* ConnectScene;
     LoginWidget* LoginScene;
     MenuWidget* MenuScene;
-    LobbyWidget *LobbyScene;
+    LobbyWidget* LobbyScene;
+    GameWidget* GameScene;
 
 signals:
 };

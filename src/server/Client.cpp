@@ -1,5 +1,7 @@
 #include "Client.h"
 
+#include <arpa/inet.h>
+
 Client::Client(const int in_socket, const sockaddr_in in_address) {
     this->socket = in_socket;
     this->address = in_address;

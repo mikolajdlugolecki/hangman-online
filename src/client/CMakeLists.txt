@@ -9,12 +9,15 @@ set(CLIENT_SOURCES
         main.cpp
 
         TcpClient.cpp
+        GameState.cpp
 
         MainWindow.cpp
 
         ConnectWidget.cpp
         LoginWidget.cpp
         MenuWidget.cpp
+        LobbyWidget.cpp
+        GameWidget.cpp
 
         ../common/Parser.cpp
         ../common/Serializer.cpp
@@ -22,12 +25,15 @@ set(CLIENT_SOURCES
 
 set(CLIENT_HEADERS
         TcpClient.h
+        GameState.h
 
         MainWindow.h
 
         ConnectWidget.h
         LoginWidget.h
         MenuWidget.h
+        LobbyWidget.h
+        GameWidget.h
 
         ../common/Parser.h
         ../common/Serializer.h
@@ -40,17 +46,18 @@ set(CLIENT_UI
         ConnectWidget.ui
         LoginWidget.ui
         MenuWidget.ui
+        LobbyWidget.ui
+        GameWidget.ui
 )
 
 qt_add_executable(Client
         ${CLIENT_SOURCES}
         ${CLIENT_HEADERS}
         ${CLIENT_UI}
-        LobbyWidget.h LobbyWidget.cpp LobbyWidget.ui
-        GameState.h GameState.cpp
 )
 
-target_include_directories(Client PRIVATE
+target_include_directories(Client
+    PRIVATE
         ../common
 )
 

@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <netinet/in.h>
+
 #include "Constants.h"
 
 bool Parser::parse(std::vector<char> &buffer, Message *out) {

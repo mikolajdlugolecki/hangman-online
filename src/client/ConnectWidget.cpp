@@ -29,6 +29,13 @@ void ConnectWidget::connTimedOut() {
     ui->connectBtn->setEnabled(true);
 }
 
+void ConnectWidget::connLost(){
+    QMessageBox::critical(this, "Error", "Connection lost");
+    ui->hostLineEdit->setEnabled(true);
+    ui->portSpinBox->setEnabled(true);
+    ui->connectBtn->setEnabled(true);
+}
+
 // void ConnectWidget::socketRead() {
 //     this->buffer.append(socket->readAll());
 //     auto *msg = new Message();

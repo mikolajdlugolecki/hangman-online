@@ -2,10 +2,10 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <fstream>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 #include <poll.h>
 
 #include "Constants.h"
@@ -80,9 +80,10 @@ void Server::handle_client(const size_t client_index) {
 		
 		if(bytes == 0){
 			close(client->socket);
-			std::cout << "Client disconnected - " << client->address_to_string() << std::endl;
+			write_debug_log(client, "Client disconnected");
 			this->clients.erase(this->clients.begin() + client_index - 1);
 			this->pfds.erase(this->pfds.begin() + client_index);
+			leave_room(client);
 			return;
 		}
 
@@ -108,6 +109,26 @@ Room* Server::find_room(std::string id) {
 		}
 	}
 	return nullptr;
+}
+
+Room * Server::find_room(Client *client) {
+	for (auto &room: this->rooms) {
+		if (room->isClientInRoom(client)) {
+			return room.get();
+		}
+	}
+	return nullptr;
+}
+
+void Server::start_game(Client *client) {
+	auto *room = find_room(client);
+
+	if (room == nullptr) {
+		write_debug_log(client, "Could not find the client's room");
+		return;
+	}
+
+	room->start_game();
 }
 
 void Server::create_new_room(Client *client)
@@ -140,13 +161,31 @@ void Server::join_room(Client *client, std::string id, std::string pin)
 	write_debug_log(client, "Joined room ID = " + room->id);
 }
 
+void Server::leave_room(Client *client) {
+	auto room = find_room(client);
+
+	if (room == nullptr) {
+		write_debug_log(client, "Could not find the client's room");
+		return;
+	}
+
+	auto *newOwner = room->leave(client);
+	write_debug_log(client, "Client left room ID = " + room->id);
+
+	if (newOwner != nullptr) {
+		write_debug_log(newOwner, "New owner of room ID = " + room->id);
+		this->send_message(newOwner, Response::ROOM_OWNERSHIP_TRANSFER, "");
+	}
+
+}
+
 void Server::handle_message(Client *client, Message *message) {
 	switch (message->type) {
 		case Request::LOGIN:
 			if (validate_nickname(client, message->payload))
 				this->send_message(client, Response::LOGIN_OK, "");
 			else
-				this->send_message(client, Response::LOGIN_FAILED, "Nickname is already taken");
+				this->send_message(client, Response::LOGIN_FAILED, "Nickname is already in use");
 			break;
 		case Request::CREATE_ROOM:
 			create_new_room(client);
@@ -157,6 +196,12 @@ void Server::handle_message(Client *client, Message *message) {
             std::string room_pin = result[1];
 			join_room(client, room_id, room_pin);
 		}
+			break;
+		case Request::LEAVE_ROOM:
+			leave_room(client);
+			break;
+		case Request::START_GAME:
+			start_game(client);
 			break;
 		default:
 			break;

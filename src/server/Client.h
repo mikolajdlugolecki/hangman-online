@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 
 #include "Message.h"
 
