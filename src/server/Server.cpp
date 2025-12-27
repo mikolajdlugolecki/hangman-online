@@ -124,7 +124,7 @@ void Server::join_room(Client *client, std::string id, std::string pin)
 
 	if(room == nullptr) {
 		this->send_message(client, Response::ROOM_FAILED, "Room not found. Wrong room id.");
-		write_debug_log(client, "Room not found ID = " + room->id);
+		write_debug_log(client, "Room not found ID = " + id);
 		return;
 	}
 
