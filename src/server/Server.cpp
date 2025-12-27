@@ -158,6 +158,8 @@ void Server::join_room(Client *client, std::string id, std::string pin)
 	room->join(client);
 
 	this->send_message(client, Response::ROOM_OK, "");
+	room->broadcast_players_list();
+
 	write_debug_log(client, "Joined room ID = " + room->id);
 }
 
