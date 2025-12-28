@@ -35,8 +35,6 @@ void TcpClient::onDisconnected(){
 
 static QVector<QString> stdVectorToQVector(const std::vector<std::string> &stdStrings) {
     QVector<QString> qStrings;
-    qStrings.reserve(static_cast<int>(stdStrings.size())); // optional, for efficiency
-
     for (const auto &s : stdStrings) {
         qStrings.append(QString::fromStdString(s));
     }
@@ -82,6 +80,9 @@ void TcpClient::onReadyRead(){
             std::string max_errors = result[1];
             emit gameStarted(QString::fromStdString(word_length), QString::fromStdString(max_errors));
             break;}
+        case Response::PING:
+            sendMessage(Request::PONG, "");
+            break;
         }
     }
     delete message;

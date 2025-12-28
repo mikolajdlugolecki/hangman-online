@@ -31,6 +31,7 @@ private:
     Room* find_room(std::string id);
     Room* find_room(Client *client);
     void start_game(Client *client);
+    void timer_thread();
 
 public:
     Server(int port);

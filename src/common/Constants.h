@@ -7,5 +7,7 @@
 #define LENGTH_SIZE 4
 #define HEADER_SIZE (TYPE_SIZE + LENGTH_SIZE)
 #define WORDS_FILE "words.txt"
+#define PING_INTERVAL_SECONDS 1
+#define PONG_TIMEOUT 3
 
 #endif

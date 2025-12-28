@@ -17,12 +17,14 @@ public:
     std::string id;
     std::string pin;
     Game* game;
+    bool is_game_started = false;
 
     Room(Server *server, Client *owner);
     ~Room();
     void add_client(Client client);
     void broadcast_message(Response::Type type, std::string payload);
-    void broadcast_players_list();
+    void broadcast_players_list_lobby();
+    void broadcast_players_list_game();
     void join(Client *client);
     Client* leave(Client *client);
     bool isClientInRoom(Client *client);

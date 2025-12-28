@@ -7,9 +7,21 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <poll.h>
+#include <thread>
+#include <unistd.h>
 
 #include "Constants.h"
 #include "Serializer.h"
+
+void Server::timer_thread() {
+	while(true) {
+		sleep(1);
+
+		for(auto &c : this->clients) {
+			c.get()->tick(this);
+		}
+	}
+}
 
 Server::Server(const int port) {
 	this->socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -44,6 +56,9 @@ Server::Server(const int port) {
 	this->pfds.push_back(pfd);
 	this->parser = new Parser();
 	std::cout << "Server listening on port " << ntohs(this->address.sin_port) << "..." << std::endl << std::endl;
+
+	std::thread timer([this]() { timer_thread(); });
+	timer.detach();
 }
 
 Server::~Server() {
@@ -158,7 +173,7 @@ void Server::join_room(Client *client, std::string id, std::string pin)
 	room->join(client);
 
 	this->send_message(client, Response::ROOM_OK, "");
-	room->broadcast_players_list();
+	room->broadcast_players_list_lobby();
 
 	write_debug_log(client, "Joined room ID = " + room->id);
 }
@@ -205,6 +220,16 @@ void Server::handle_message(Client *client, Message *message) {
 		case Request::START_GAME:
 			start_game(client);
 			break;
+		case Request::PONG: {
+			client->received_pong = true;
+			if(client->is_connected == false) {
+				client->pong_timeout_counters_seconds.clear();
+			}
+			if(client->pong_timeout_counters_seconds.size() > 0) {
+				 client->pong_timeout_counters_seconds.erase(client->pong_timeout_counters_seconds.begin());
+			 }
+			write_debug_log(client, "Pong received");
+			}
 		default:
 			break;
 	}

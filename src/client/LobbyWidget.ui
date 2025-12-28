@@ -63,6 +63,12 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="font">
+          <font>
+           <family>Courier 10 Pitch</family>
+           <kerning>true</kerning>
+          </font>
+         </property>
         </widget>
        </item>
       </layout>
