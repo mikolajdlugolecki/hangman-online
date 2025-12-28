@@ -25,7 +25,7 @@ void Client::tick(Server *server) {
     if(ping_interval_counter_seconds <= 0) {
         ping_interval_counter_seconds = PING_INTERVAL_SECONDS;
         pong_timeout_counters_seconds.push_back(PONG_TIMEOUT);
-        server->write_debug_log(this, "Sending ping");
+        //server->write_debug_log(this, "Sending ping");
         server->send_message(this, Response::PING, "");
     }
 

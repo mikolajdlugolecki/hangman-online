@@ -228,7 +228,7 @@ void Server::handle_message(Client *client, Message *message) {
 			if(client->pong_timeout_counters_seconds.size() > 0) {
 				 client->pong_timeout_counters_seconds.erase(client->pong_timeout_counters_seconds.begin());
 			 }
-			write_debug_log(client, "Pong received");
+			//write_debug_log(client, "Pong received");
 			}
 		default:
 			break;
