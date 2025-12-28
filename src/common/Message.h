@@ -4,7 +4,8 @@
 #include <cstdint>
 #include <string>
 
-struct Message {
+struct Message
+{
     uint8_t type;
     uint32_t length;
     std::string payload;

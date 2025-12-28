@@ -4,8 +4,9 @@
 #include <QWidget>
 #include "GameState.h"
 
-namespace Ui {
-class LoginWidget;
+namespace Ui
+{
+    class LoginWidget;
 }
 
 class LoginWidget : public QWidget
@@ -13,7 +14,7 @@ class LoginWidget : public QWidget
     Q_OBJECT
 public:
     explicit LoginWidget(QWidget *parent = nullptr);
-    void loginBtnHit();
+    void loginButtonHit();
     void nicknameError(const QString error);
 
 private:

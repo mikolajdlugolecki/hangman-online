@@ -11,32 +11,33 @@
 class Game;
 class Server;
 
-class Room {
+class Room
+{
 public:
-
     std::string id;
     std::string pin;
     Game* game;
-    bool is_game_started = false;
+    bool isGameStarted = false;
 
     Room(Server *server, Client *owner);
     ~Room();
-    void add_client(Client client);
-    void broadcast_message(Response::Type type, std::string payload);
-    void broadcast_players_list_lobby();
-    void broadcast_players_list_game();
+    void addClient(Client client);
+    void broadcastMessage(Response::Type type, const std::string& payload) const;
+    void broadcastPlayersListLobby() const;
+    void broadcastPlayersListGame() const;
+    void broadcastPlayersGameStats() const;
     void join(Client *client);
-    Client* leave(Client *client);
-    bool isClientInRoom(Client *client);
-    void start_game();
+    Client* leave(const Client *client);
+    bool isClientInRoom(const Client *client) const;
+    void startGame();
 
 private:
     Client *owner;
     Server *server;
     std::vector<Client*> clients;
-    static inline int room_counter = 1;
+    static inline int roomCounter = 1;
 
-    std::string generate_pin();
+    static std::string generatePin();
 };  
 
 #endif

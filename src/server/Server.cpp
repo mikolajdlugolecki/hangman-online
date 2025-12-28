@@ -1,37 +1,43 @@
 #include "Server.h"
 
-#include <iostream>
 #include <cstdlib>
 #include <fstream>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <netinet/in.h>
+#include <iostream>
 #include <poll.h>
 #include <thread>
 #include <unistd.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 #include "Constants.h"
+#include "Game.h"
 #include "Serializer.h"
 
-void Server::timer_thread() {
-	while(true) {
+void Server::timerThread()
+{
+	while(true)
+	{
 		sleep(1);
 
-		for(auto &c : this->clients) {
-			c.get()->tick(this);
+		for(const auto &client : this->clients)
+		{
+			client->tick(this);
 		}
 	}
 }
 
-Server::Server(const int port) {
+Server::Server(const int port)
+{
 	this->socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if(this->socket == -1){
+	if(this->socket == -1)
+	{
 		perror("Error creating socket");
 		exit(EXIT_FAILURE);
 	}
 
-	const int one = 1;
-	if(setsockopt(this->socket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) == -1){
+	constexpr int one = 1;
+	if(setsockopt(this->socket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) == -1)
+	{
 		perror("Error chaning socket options");
 		exit(EXIT_FAILURE);
 	}
@@ -40,12 +46,14 @@ Server::Server(const int port) {
 	this->address.sin_family = AF_INET;
 	this->address.sin_addr.s_addr = htonl(INADDR_ANY);
 	this->address.sin_port = htons(port);
-	if(bind(this->socket, reinterpret_cast<sockaddr *>(&this->address), sizeof(this->address)) == -1){
+	if(bind(this->socket, reinterpret_cast<sockaddr *>(&this->address), sizeof(this->address)) == -1)
+	{
 		perror("Error binding address to a socket");
 		exit(EXIT_FAILURE);
 	}
 
-	if(listen(this->socket, SOMAXCONN) == -1){
+	if(listen(this->socket, SOMAXCONN) == -1)
+	{
 		perror("Error marking server socket as a listening socket");
 		exit(EXIT_FAILURE);
 	}
@@ -54,188 +62,253 @@ Server::Server(const int port) {
 	pfd.fd = this->socket;
 	pfd.events = POLLIN;
 	this->pfds.push_back(pfd);
-	this->parser = new Parser();
-	std::cout << "Server listening on port " << ntohs(this->address.sin_port) << "..." << std::endl << std::endl;
 
-	std::thread timer([this]() { timer_thread(); });
+	this->parser = new Parser();
+
+	std::thread timer([this]() { timerThread(); });
 	timer.detach();
+
+	std::cout << "Server listening on port " << ntohs(this->address.sin_port) << "..." << std::endl << std::endl;
 }
 
-Server::~Server() {
+Server::~Server()
+{
 	if (this->socket != -1)
+	{
 		close(this->socket);
+	}
 	delete parser;
 }
 
-void Server::accept_new_client() {
-	sockaddr_in client_address = {};
-	socklen_t s = sizeof(client_address);
+void Server::acceptNewClient()
+{
+	sockaddr_in clientAddress = {};
+	socklen_t s = sizeof(clientAddress);
 	
-	const int client_socket = accept(this->socket, reinterpret_cast<sockaddr *>(&client_address), &s);
-	if(client_socket == -1){
+	const int clientSocket = accept(this->socket, reinterpret_cast<sockaddr *>(&clientAddress), &s);
+	if(clientSocket == -1)
+	{
 		perror("Error accepting new client");
 		return;
 	}
 
 	pollfd pfd{};
-	pfd.fd = client_socket;
+	pfd.fd = clientSocket;
 	pfd.events = POLLIN;
-	this->clients.push_back(std::make_unique<Client>(client_socket, client_address));
+	this->clients.push_back(std::make_unique<Client>(clientSocket, clientAddress));
 	this->pfds.push_back(pfd);
-	write_debug_log(clients.back().get(), "New client accepted");
+	writeDebugLog(clients.back().get(), "New client accepted");
 }
 
-void Server::handle_client(const size_t client_index) {
-
-	if(this->pfds[client_index].revents & POLLIN){
+void Server::handleClient(const size_t client_index)
+{
+	if(this->pfds[client_index].revents & POLLIN)
+	{
 		char buffer[MSG_SIZE]{};
 		Client *client = this->clients[client_index - 1].get();
 		const size_t bytes = read(client->socket, buffer, MSG_SIZE);
 		client->buffer.insert(client->buffer.end(), buffer, buffer + bytes);
 		
-		if(bytes == 0){
+		if(bytes == 0)
+		{
 			close(client->socket);
-			write_debug_log(client, "Client disconnected");
+			leaveRoom(client);
+			writeDebugLog(client, "Client disconnected");
 			this->clients.erase(this->clients.begin() + client_index - 1);
 			this->pfds.erase(this->pfds.begin() + client_index);
-			leave_room(client);
 			return;
 		}
 
-		while (this->parser->parse(client->buffer, client->message)) {
-			write_debug_log(client, "Message received. type = " + std::to_string(client->message->type) + " Payload " + client->message->payload);
+		while (this->parser->parse(client->buffer, client->message))
+		{
+			writeDebugLog(client, "Message received. type = " + std::to_string(client->message->type) + " Payload " + client->message->payload);
 			// auto buf = Serializer::serialize(*client->message);
 			// for (unsigned char c : buf)
 			// 	std::cout << std::hex << (int)c << " ";
 			// std::cout << std::endl;
-			this->handle_message(client, client->message);
+			this->handleMessage(client, client->message);
 		}
 	}
 }
 
-void Server::write_debug_log(Client *client, std::string message) {
-	std::cout << client->address_to_string() << " --- " << message << std::endl;
+void Server::writeDebugLog(const Client *client, const std::string& message)
+{
+	std::cout << client->addressToString() << " --- " << message << std::endl;
 }
 
-Room* Server::find_room(std::string id) {
-	for(auto &room : this->rooms) {
-		if(room->id == id) {
+Room* Server::findRoom(const std::string& id) const
+{
+	for(auto &room : this->rooms)
+	{
+		if(room->id == id)
+		{
 			return room.get();
 		}
 	}
 	return nullptr;
 }
 
-Room * Server::find_room(Client *client) {
-	for (auto &room: this->rooms) {
-		if (room->isClientInRoom(client)) {
+Room * Server::findRoom(const Client *client) const
+{
+	for (auto &room: this->rooms)
+	{
+		if (room->isClientInRoom(client))
+		{
 			return room.get();
 		}
 	}
 	return nullptr;
 }
 
-void Server::start_game(Client *client) {
-	auto *room = find_room(client);
+void Server::startGame(const Client *roomOwner) const {
+	auto *room = findRoom(roomOwner);
 
-	if (room == nullptr) {
-		write_debug_log(client, "Could not find the client's room");
+	if (room == nullptr)
+	{
+		writeDebugLog(roomOwner, "Could not find the client's room");
 		return;
 	}
 
-	room->start_game();
+	room->startGame();
 }
 
-void Server::create_new_room(Client *client)
+void Server::checkGuess(Client *client, const std::string &letter)
+{
+	const auto *room = findRoom(client);
+
+	if (room == nullptr)
+	{
+		writeDebugLog(client, "Could not find the client's room");
+		return;
+	}
+
+	auto positions = room->game->letterInWord(letter);
+	if (!positions.empty())
+	{
+		this->sendMessage(client, Response::GUESS_OK, positions);
+
+	}
+	else
+	{
+		if (++client->errors == room->game->maxErrors)
+		{
+
+		}
+		this->sendMessage(client, Response::GUESS_WRONG, "");
+	}
+	// terminate called after throwing an instance of 'std::length_error'
+	// what():  vector::_M_range_insert
+	// room->broadcastPlayersGameStats();
+}
+
+void Server::createNewRoom(Client *client)
 {
 	auto room = std::make_unique<Room>(this, client);
-	this->send_message(client, Response::ROOM_CREATED, room->id + "|" + room->pin);
-	write_debug_log(client, "Room created ID = " + room->id + " PIN = " + room->pin);
+	this->sendMessage(client, Response::ROOM_CREATED, room->id + "|" + room->pin);
+	writeDebugLog(client, "Room created ID = " + room->id + " PIN = " + room->pin);
 	this->rooms.push_back(std::move(room));
 }
 
-void Server::join_room(Client *client, std::string id, std::string pin)
+void Server::joinRoom(Client *client, const std::string& id, const std::string& pin)
 {
-	auto room = find_room(id);
+	const auto room = findRoom(id);
 
-	if(room == nullptr) {
-		this->send_message(client, Response::ROOM_FAILED, "Room not found. Wrong room id.");
-		write_debug_log(client, "Room not found ID = " + id);
+	if(room == nullptr)
+	{
+		this->sendMessage(client, Response::ROOM_FAILED, "Room not found. Wrong room id.");
+		writeDebugLog(client, "Room not found ID = " + id);
 		return;
 	}
 
-	if(pin != room->pin) {
-		this->send_message(client, Response::ROOM_FAILED, "Wrong pin!");
-		write_debug_log(client, "Wrong room pin ID = " + room->id);
+	if(pin != room->pin)
+	{
+		this->sendMessage(client, Response::ROOM_FAILED, "Wrong pin!");
+		writeDebugLog(client, "Wrong room pin ID = " + room->id);
 		return;
 	}
 
 	room->join(client);
 
-	this->send_message(client, Response::ROOM_OK, "");
-	room->broadcast_players_list_lobby();
+	this->sendMessage(client, Response::ROOM_OK, "");
+	room->broadcastPlayersListLobby();
 
-	write_debug_log(client, "Joined room ID = " + room->id);
+	writeDebugLog(client, "Joined room ID = " + room->id);
 }
 
-void Server::leave_room(Client *client) {
-	auto room = find_room(client);
+void Server::leaveRoom(const Client *client)
+{
+	const auto room = findRoom(client);
 
-	if (room == nullptr) {
-		write_debug_log(client, "Could not find the client's room");
+	if (room == nullptr)
+	{
+		writeDebugLog(client, "Could not find the client's room");
 		return;
 	}
 
-	auto *newOwner = room->leave(client);
-	write_debug_log(client, "Client left room ID = " + room->id);
+	const auto *newOwner = room->leave(client);
+	writeDebugLog(client, "Client left room ID = " + room->id);
 
-	if (newOwner != nullptr) {
-		write_debug_log(newOwner, "New owner of room ID = " + room->id);
-		this->send_message(newOwner, Response::ROOM_OWNERSHIP_TRANSFER, "");
+	if (newOwner != nullptr)
+	{
+		writeDebugLog(newOwner, "New owner of room ID = " + room->id);
+		this->sendMessage(newOwner, Response::ROOM_OWNERSHIP_TRANSFER, "");
 	}
-
 }
 
-void Server::handle_message(Client *client, Message *message) {
-	switch (message->type) {
+void Server::handleMessage(Client *client, const Message *message)
+{
+	switch (message->type)
+	{
 		case Request::LOGIN:
-			if (validate_nickname(client, message->payload))
-				this->send_message(client, Response::LOGIN_OK, "");
+			if (validateNickname(client, message->payload))
+			{
+				this->sendMessage(client, Response::LOGIN_OK, "");
+			}
 			else
-				this->send_message(client, Response::LOGIN_FAILED, "Nickname is already in use");
+			{
+				this->sendMessage(client, Response::LOGIN_FAILED, "Nickname is already in use");
+			}
 			break;
 		case Request::CREATE_ROOM:
-			create_new_room(client);
+			createNewRoom(client);
 			break;
-		case Request::JOIN_ROOM: {
-			std::vector<std::string> result = parser->split_message(message->payload);
-            std::string room_id = result[0];
-            std::string room_pin = result[1];
-			join_room(client, room_id, room_pin);
+		case Request::JOIN_ROOM:
+		{
+			const std::vector<std::string> result = parser->splitMessage(message->payload);
+            const std::string& room_id = result[0];
+            const std::string& room_pin = result[1];
+			joinRoom(client, room_id, room_pin);
 		}
 			break;
 		case Request::LEAVE_ROOM:
-			leave_room(client);
+			leaveRoom(client);
 			break;
 		case Request::START_GAME:
-			start_game(client);
+			startGame(client);
 			break;
-		case Request::PONG: {
-			client->received_pong = true;
-			if(client->is_connected == false) {
-				client->pong_timeout_counters_seconds.clear();
+		case Request::PONG:
+		{
+			client->receivedPong = true;
+			if(client->isConnected == false)
+			{
+				client->pongTimeoutCountersSeconds.clear();
 			}
-			if(client->pong_timeout_counters_seconds.size() > 0) {
-				 client->pong_timeout_counters_seconds.erase(client->pong_timeout_counters_seconds.begin());
-			 }
-			//write_debug_log(client, "Pong received");
+			if(!client->pongTimeoutCountersSeconds.empty())
+			{
+				 client->pongTimeoutCountersSeconds.erase(client->pongTimeoutCountersSeconds.begin());
 			}
+			//writeDebugLog(client, "Pong received");
+		}
+			break;
+		case Request::GUESS:
+			checkGuess(client, message->payload);
+			break;
 		default:
 			break;
 	}
 }
 
-void Server::send_message(const Client *client, Response::Type type, const std::string& payload) {
+void Server::sendMessage(const Client *client, const Response::Type type, const std::string& payload) {
 	client->message->type = type;
 	client->message->length = payload.size();
 	client->message->payload = payload;
@@ -246,21 +319,31 @@ void Server::send_message(const Client *client, Response::Type type, const std::
 	write(client->socket, Serializer::serialize(*client->message).data(), HEADER_SIZE + client->message->length);
 }
 
-bool Server::validate_nickname(Client *client, const std::string &nickname) {
-	for (auto &c : this->clients) {
+bool Server::validateNickname(Client *client, const std::string &nickname) const
+{
+	for (auto &c : this->clients)
+	{
 		if (c->nickname == nickname)
+		{
 			return false;
+		}
 	}
 	client->nickname = nickname;
 	return true;
 }
 
-void Server::run() {
-	while(true) {
+void Server::run()
+{
+	while(true)
+	{
 		poll(this->pfds.data(), this->pfds.size(), -1);
 		if (pfds[0].revents & POLLIN)
-			this->accept_new_client();
+		{
+			this->acceptNewClient();
+		}
 		for (size_t i = 1; i < this->clients.size() + 1; i++)
-			this->handle_client(i);
+		{
+			this->handleClient(i);
+		}
 	}
 }

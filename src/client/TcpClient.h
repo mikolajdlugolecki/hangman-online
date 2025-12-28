@@ -6,8 +6,8 @@
 #include <QTimer>
 #include <QVector>
 
-#include "Parser.h"
 #include "MessageType.h"
+#include "Parser.h"
 
 class TcpClient : public QObject
 {
@@ -17,9 +17,11 @@ public:
     void connectToServer(const QString& host, quint16 port);
     void nicknameReceived(const QString& nickname);
     void createRoomReceived();
-    void joinRoomReceived(const QString& room_id, const QString& room_pin);
+    void joinRoomReceived(const QString& roomId, const QString& roomPin);
     void leaveRoomReceived();
     void startGameReceived();
+    void guessReceived(const QString& letter);
+
 protected:
     QTcpSocket *socket = new QTcpSocket(this);
     QTimer *timer = new QTimer(this);
@@ -39,12 +41,15 @@ signals:
     void connectionLost();
     void nicknameOK();
     void nicknameError(const QString error);
-    void roomCreated(const QString room_id, const QString room_pin);
+    void roomCreated(const QString roomId, const QString roomPin);
     void roomOK();
     void roomError(const QString error);
-    void roomOwnerShipTransfer();
+    void roomOwnershipTransfer();
     void updateLobbyPlayerList(const QVector<QString> nicknames);
-    void gameStarted(const QString word_length, const QString max_errors);
+    void gameStarted(const QString wordLength, const QString maxErrors, const QString maxSeconds);
+    void gameState(const std::vector<std::vector<std::string>> stats);
+    void guessPositions(std::vector<std::string> result);
+    void guessIncorrect();
 };
 
 #endif // TCPCLIENT_H

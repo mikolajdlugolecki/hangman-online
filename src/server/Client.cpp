@@ -2,51 +2,59 @@
 
 #include <arpa/inet.h>
 
-#include "Server.h"
 #include "Room.h"
+#include "Server.h"
 
-Client::Client(const int in_socket, const sockaddr_in in_address) {
-    this->socket = in_socket;
-    this->address = in_address;
+Client::Client(const int inSocket, const sockaddr_in inAddress)
+{
+    this->socket = inSocket;
+    this->address = inAddress;
     this->message = new Message();
 }
 
-Client::~Client() {
+Client::~Client()
+{
     delete message;
 }
 
-std::string Client::address_to_string()
+std::string Client::addressToString() const
 {
     return std::string(inet_ntoa(this->address.sin_addr)) + ":" + std::to_string(ntohs(this->address.sin_port));   
 }
 
-void Client::tick(Server *server) {
-    ping_interval_counter_seconds--;
-    if(ping_interval_counter_seconds <= 0) {
-        ping_interval_counter_seconds = PING_INTERVAL_SECONDS;
-        pong_timeout_counters_seconds.push_back(PONG_TIMEOUT);
+void Client::tick(Server *server)
+{
+    pingIntervalCounterSeconds--;
+    if(pingIntervalCounterSeconds <= 0)
+    {
+        pingIntervalCounterSeconds = PING_INTERVAL_SECONDS;
+        pongTimeoutCountersSeconds.push_back(PONG_TIMEOUT);
         //server->write_debug_log(this, "Sending ping");
-        server->send_message(this, Response::PING, "");
+        server->sendMessage(this, Response::PING, "");
     }
 
-    for(auto  &p : pong_timeout_counters_seconds) {
+    for(auto  &p : pongTimeoutCountersSeconds)
+    {
         p--;
     }
     
-    if(pong_timeout_counters_seconds.size() > 0 && pong_timeout_counters_seconds[0] <= 0) {
-        pong_timeout_counters_seconds.erase(pong_timeout_counters_seconds.begin());
-        received_pong = false;
+    if(!pongTimeoutCountersSeconds.empty() && pongTimeoutCountersSeconds[0] <= 0)
+    {
+        pongTimeoutCountersSeconds.erase(pongTimeoutCountersSeconds.begin());
+        receivedPong = false;
     }
 
-    if(is_connected != received_pong && room != nullptr) {
-        is_connected = received_pong;
+    if(isConnected != receivedPong && room != nullptr)
+    {
+        isConnected = receivedPong;
 
-        if(room->is_game_started == false) {
-            room->broadcast_players_list_lobby();
+        if(room->isGameStarted == false)
+        {
+            room->broadcastPlayersListLobby();
         }
-        else {
-            room->broadcast_players_list_game();
+        else
+        {
+            room->broadcastPlayersListGame();
         }
     }
-        
 }

@@ -5,7 +5,8 @@
 
 #include "Message.h"
 
-class Serializer {
+class Serializer
+{
 public:
     static std::vector<char> serialize(const Message& message);
 };

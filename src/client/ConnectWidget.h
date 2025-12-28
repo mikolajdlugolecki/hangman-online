@@ -5,21 +5,22 @@
 #include <QTimer>
 #include <QWidget>
 
-namespace Ui {
-class ConnectWidget;
+namespace Ui
+{
+    class ConnectWidget;
 }
 
-class ConnectWidget : public QWidget {
+class ConnectWidget : public QWidget
+{
     Q_OBJECT
-
   public:
     explicit ConnectWidget(QWidget *parent = 0);
     ~ConnectWidget();
-    void connTimedOut();
-    void connLost();
+    void connectionTimedOut();
+    void connectionLost();
 
   protected:
-    void connectBtnHit();
+    void connectButtonHit();
 
   private:
     Ui::ConnectWidget *ui;
@@ -27,4 +28,5 @@ class ConnectWidget : public QWidget {
   signals:
     void connectionRequested(const QString& host, quint16 port);
 };
+
 #endif

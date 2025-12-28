@@ -4,18 +4,18 @@
 #include <QWidget>
 #include "GameState.h"
 
-namespace Ui {
-class LobbyWidget;
+namespace Ui
+{
+    class LobbyWidget;
 }
 
 class LobbyWidget : public QWidget
 {
     Q_OBJECT
-
 public:
     explicit LobbyWidget(QWidget *parent = nullptr);
     ~LobbyWidget();
-    void lobbyOwnerShipReceived();
+    void lobbyOwnershipReceived();
     void updateLobbyPlayerList(QVector<QString> nicknames);
 
 private:

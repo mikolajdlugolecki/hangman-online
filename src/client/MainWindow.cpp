@@ -1,8 +1,7 @@
 #include "MainWindow.h"
 #include "GameState.h"
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow{parent}
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
     this->setWindowTitle("Hangman");
     this->resize(900, 600);
@@ -27,15 +26,17 @@ MainWindow::MainWindow(QWidget *parent)
     stack->setCurrentWidget(ConnectScene);
 
     // ConnectWidget
-    connect(client, &TcpClient::connectionLost, this, [this]() {
+    connect(client, &TcpClient::connectionLost, this, [this]()
+    {
         stack->setCurrentWidget(ConnectScene);
     });
-    connect(client, &TcpClient::connectionLost, ConnectScene, &ConnectWidget::connLost);
+    connect(client, &TcpClient::connectionLost, ConnectScene, &ConnectWidget::connectionLost);
 
     connect(ConnectScene, &ConnectWidget::connectionRequested, client, &TcpClient::connectToServer);
-    connect(client, &TcpClient::timeout, ConnectScene, &ConnectWidget::connTimedOut);
+    connect(client, &TcpClient::timeout, ConnectScene, &ConnectWidget::connectionTimedOut);
 
-    connect(client, &TcpClient::connected, this, [this]() {
+    connect(client, &TcpClient::connected, this, [this]()
+    {
         stack->setCurrentWidget(LoginScene);
     });
 
@@ -43,7 +44,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(LoginScene, &LoginWidget::nicknameSent, client, &TcpClient::nicknameReceived);
     connect(client, &TcpClient::nicknameError, LoginScene, &LoginWidget::nicknameError);
 
-    connect(client, &TcpClient::nicknameOK, this, [this]() {
+    connect(client, &TcpClient::nicknameOK, this, [this]()
+    {
         stack->setCurrentWidget(MenuScene);
     });
 
@@ -52,7 +54,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(MenuScene, &MenuWidget::joinRoomRequested, client, &TcpClient::joinRoomReceived);
     connect(client, &TcpClient::roomError, MenuScene, &MenuWidget::roomError);
 
-    connect(client, &TcpClient::roomCreated, this, [this](const QString roomId, const QString roomPin) {
+    connect(client, &TcpClient::roomCreated, this, [this](const QString roomId, const QString roomPin)
+    {
         GameState::instance().roomId = roomId;
         GameState::instance().roomPin = roomPin;
         GameState::instance().isRoomOwner = true;
@@ -69,21 +72,30 @@ MainWindow::MainWindow(QWidget *parent)
     connect(client, &TcpClient::updateLobbyPlayerList, LobbyScene, &LobbyWidget::updateLobbyPlayerList);
 
     connect(LobbyScene, &LobbyWidget::leaveRoomRequested, client, &TcpClient::leaveRoomReceived);
-    connect(LobbyScene, &LobbyWidget::leaveRoomRequested, this, [this]() {
-        stack->setCurrentWidget(MenuScene);
+    connect(LobbyScene, &LobbyWidget::leaveRoomRequested, this, [this]()
+    {
         GameState::instance().roomId = nullptr;
         GameState::instance().roomPin = nullptr;
         GameState::instance().isRoomOwner = false;
         GameState::instance().roomPlayers.clear();
+
+        stack->setCurrentWidget(MenuScene);
     });
 
-    connect(client, &TcpClient::roomOwnerShipTransfer, LobbyScene, &LobbyWidget::lobbyOwnerShipReceived);
+    connect(client, &TcpClient::roomOwnershipTransfer, LobbyScene, &LobbyWidget::lobbyOwnershipReceived);
 
     connect(LobbyScene, &LobbyWidget::startGameRequested, client, &TcpClient::startGameReceived);
-    connect(client, &TcpClient::gameStarted, this, [this](const QString word_length, const QString max_errors) {
+    connect(client, &TcpClient::gameStarted, this, [this](const QString wordLength, const QString maxErrors)
+    {
         stack->setCurrentWidget(GameScene);
-        GameState::instance().word_length = word_length;
-        GameState::instance().max_errors = max_errors;
+        GameState::instance().wordLength = wordLength;
+        GameState::instance().maxErrors = maxErrors;
     });
     connect(client, &TcpClient::gameStarted, GameScene, &GameWidget::init);
+
+    // GameWidget
+    connect(GameScene, &GameWidget::guessRequested, client, &TcpClient::guessReceived);
+    connect(client, &TcpClient::guessPositions, GameScene, &GameWidget::guessPositions);
+    connect(client, &TcpClient::guessIncorrect, GameScene, &GameWidget::guessIncorrect);
+    connect(client, &TcpClient::gameState, GameScene, &GameWidget::gameStatsReceived);
 }

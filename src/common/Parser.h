@@ -6,19 +6,23 @@
 
 #include "Message.h"
 
-enum ParserState {
+enum ParserState
+{
     READ_TYPE,
     READ_LENGTH,
     READ_PAYLOAD
 };
 
-class Parser {
+class Parser
+{
 public:
     bool parse(std::vector<char> &buffer, Message *out);
-    std::vector<std::string> split_message(const std::string& payload);
+    static std::vector<std::string> splitMessage(const std::string& payload);
+    static std::vector<std::vector<std::string>> splitGameStateMessage(const std::string& payload);
+
 private:
-    ParserState next_state = ParserState::READ_TYPE;
-    uint32_t expected_length = 0;
+    ParserState nextState = ParserState::READ_TYPE;
+    uint32_t expectedLength = 0;
 };
 
 #endif

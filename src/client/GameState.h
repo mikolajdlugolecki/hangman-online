@@ -8,21 +8,22 @@ class GameState : public QObject
 {
     Q_OBJECT
 public:
-    static GameState& instance() {
+    static GameState& instance()
+    {
         static GameState instance;
         return instance;
     }
 
     QString usersNickname;
-
     QString roomId;
     QString roomPin;
     bool isRoomOwner;
     QVector<QString> roomPlayers;
-    QString word_length;
-    int current_errors;
-    QString max_errors;
-    QString word;
+    QString wordLength;
+    int currentErrors;
+    QString maxErrors;
+    std::vector<char> word;
+    QString lastGuessedLetter;
 
 private:
     GameState();

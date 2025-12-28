@@ -16,6 +16,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = nullptr);
+
 private:
     QStackedWidget* stack;
 
@@ -26,8 +27,6 @@ private:
     MenuWidget* MenuScene;
     LobbyWidget* LobbyScene;
     GameWidget* GameScene;
-
-signals:
 };
 
 #endif // MAINWINDOW_H

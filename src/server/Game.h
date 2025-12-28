@@ -4,17 +4,22 @@
 #include <string>
 #include <vector>
 
-class Game {
+class Game
+{
 public:
-    unsigned short int word_length;
-    unsigned short int max_errors;
-    static Game* create(unsigned short int max_errors);
-    std::string getGameStartedPayload();
+    unsigned short int wordLength;
+    unsigned short int maxErrors;
+    unsigned short int maxSeconds;
+
+    static Game* create(unsigned short int maxErrors, unsigned short int maxSeconds);
+    std::string getGameStartedPayload() const;
+    std::string letterInWord(const std::string& letter);
 private:
     std::string word;
-    static std::vector<std::string> available_words;
-    static std::vector<std::string> loadWords(const std::string& file_name);
-    Game(unsigned short int max_errors);
+    static std::vector<std::string> availableWords;
+
+    Game(unsigned short int maxErrors, unsigned short int maxSeconds);
+    static std::vector<std::string> loadWords(const std::string& fileName);
 };
 
 #endif

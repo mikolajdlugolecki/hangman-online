@@ -16,9 +16,9 @@
   <widget class="QLabel" name="maskedWordLabel">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>270</y>
-     <width>841</width>
+     <x>60</x>
+     <y>310</y>
+     <width>391</width>
      <height>61</height>
     </rect>
    </property>
@@ -37,18 +37,132 @@
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>420</y>
+     <width>230</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <item>
+     <widget class="QLineEdit" name="guessLineEdit">
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
+      </property>
+      <property name="maxLength">
+       <number>1</number>
+      </property>
+      <property name="placeholderText">
+       <string>Letter</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="guessButton">
+      <property name="text">
+       <string>Guess</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QTableWidget" name="statsTable">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>540</x>
+     <y>70</y>
+     <width>321</width>
+     <height>501</height>
+    </rect>
+   </property>
+   <property name="cornerButtonEnabled">
+    <bool>true</bool>
+   </property>
+   <column>
+    <property name="text">
+     <string>Nick</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Status</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Score</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Errors</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>640</x>
+     <y>20</y>
+     <width>111</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Scoreboard</string>
+   </property>
+  </widget>
   <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
      <x>20</x>
      <y>20</y>
-     <width>245</width>
-     <height>64</height>
+     <width>275</width>
+     <height>98</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="font">
+         <font>
+          <pointsize>16</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Remaining time:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="timeLabel">
+        <property name="font">
+         <font>
+          <pointsize>16</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>placeholder</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QLabel" name="label">
         <property name="font">
@@ -76,7 +190,7 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
        <widget class="QLabel" name="label_2">
         <property name="font">
