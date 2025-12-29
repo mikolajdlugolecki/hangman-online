@@ -153,21 +153,9 @@ Room *Server::findRoom(const std::string &id) const
     return nullptr;
 }
 
-Room *Server::findRoom(const Client *client) const
-{
-    for (auto &room : this->rooms)
-    {
-        if (room->isClientInRoom(client))
-        {
-            return room.get();
-        }
-    }
-    return nullptr;
-}
-
 void Server::startGame(const Client *roomOwner) const
 {
-    auto *room = findRoom(roomOwner);
+    auto *room = roomOwner->room;
 
     if (room == nullptr)
     {
@@ -243,7 +231,7 @@ void Server::joinRoom(Client *client, const std::string &id, const std::string &
 
 void Server::leaveRoom(const Client *client)
 {
-    const auto room = findRoom(client);
+    const auto room = client->room;
 
     if (room == nullptr)
     {
