@@ -32,7 +32,7 @@ std::string Room::generatePin()
     return std::to_string(number);
 }
 
-void Room::broadcastMessage(const Response::Type type, const std::string &payload) const
+void Room::broadcastMessage(const ServerMessageTypes::Type type, const std::string &payload) const
 {
     for (const auto client : this->clients)
     {
@@ -84,7 +84,7 @@ void Room::broadcastPlayersListLobby() const
     }
 
     std::cout << "Broadcasting players list for room ID = " << this->id << " list = " << message << std::endl;
-    broadcastMessage(Response::ROOM_USERS_LIST, message);
+    broadcastMessage(ServerMessageTypes::ROOM_USERS_LIST, message);
 }
 
 void Room::broadcastPlayersListGame() const
@@ -114,7 +114,7 @@ void Room::broadcastPlayersListGame() const
     }
 
     std::cout << "Broadcasting players list for room ID = " << this->id << " list = " << message << std::endl;
-    broadcastMessage(Response::ROOM_USERS_LIST, message);
+    broadcastMessage(ServerMessageTypes::ROOM_USERS_LIST, message);
 }
 
 void Room::broadcastPlayersGameStats() const
@@ -153,7 +153,7 @@ void Room::broadcastPlayersGameStats() const
     }
     
     std::cout << "Broadcasting game stats for room ID = " << this->id << " list = " << payload << std::endl;
-    this->broadcastMessage(Response::GAME_STATE, payload);
+    this->broadcastMessage(ServerMessageTypes::GAME_STATE, payload);
 }
 
 void Room::join(Client *client)
@@ -213,7 +213,7 @@ void Room::startGame()
 {
     this->game = Game::create(10, 60);
     isGameStarted = true;
-    broadcastMessage(Response::GAME_STARTED, this->game->getGameStartedPayload());
+    broadcastMessage(ServerMessageTypes::GAME_STARTED, this->game->getGameStartedPayload());
     for (auto client : this->clients)
     {
         client->errors = 0;

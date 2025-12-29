@@ -58,13 +58,13 @@ void TcpClient::onReadyRead()
     {
         switch (message->type)
         {
-        case Response::LOGIN_OK:
+        case ServerMessageTypes::LOGIN_OK:
             emit nicknameOK();
             break;
-        case Response::LOGIN_FAILED:
+        case ServerMessageTypes::LOGIN_FAILED:
             emit nicknameError(QString::fromStdString(message->payload));
             break;
-        case Response::ROOM_CREATED:
+        case ServerMessageTypes::ROOM_CREATED:
         {
             std::vector<std::string> result = parser->splitMessage(message->payload);
             std::string roomId = result[0];
@@ -72,22 +72,22 @@ void TcpClient::onReadyRead()
             emit roomCreated(QString::fromStdString(roomId), QString::fromStdString(roomPin));
         }
         break;
-        case Response::ROOM_OK:
+        case ServerMessageTypes::ROOM_OK:
             emit roomOK();
             break;
-        case Response::ROOM_FAILED:
+        case ServerMessageTypes::ROOM_FAILED:
             emit roomError(QString::fromStdString(message->payload));
             break;
-        case Response::ROOM_OWNERSHIP_TRANSFER:
+        case ServerMessageTypes::ROOM_OWNERSHIP_TRANSFER:
             emit roomOwnershipTransfer();
             break;
-        case Response::ROOM_USERS_LIST:
+        case ServerMessageTypes::ROOM_USERS_LIST:
         {
             std::vector<std::string> result = parser->splitMessage(message->payload);
             emit updateLobbyPlayerList(stdVectorToQVector(result));
         }
         break;
-        case Response::GAME_STARTED:
+        case ServerMessageTypes::GAME_STARTED:
         {
             std::vector<std::string> result = parser->splitMessage(message->payload);
             std::string wordLength = result[0];
@@ -98,19 +98,19 @@ void TcpClient::onReadyRead()
                              QString::fromStdString(maxSeconds));
         }
         break;
-        case Response::PING:
-            sendMessage(Request::PONG, "");
+        case ServerMessageTypes::PING:
+            sendMessage(ClientMessageTypes::PONG, "");
             break;
-        case Response::GUESS_OK:
+        case ServerMessageTypes::GUESS_OK:
         {
             std::vector<std::string> result = parser->splitMessage(message->payload);
             emit guessPositions(result);
         }
         break;
-        case Response::GUESS_WRONG:
+        case ServerMessageTypes::GUESS_WRONG:
             emit guessIncorrect();
             break;
-        case Response::GAME_STATE:
+        case ServerMessageTypes::GAME_STATE:
             //std::vector<std::vector<std::string>> stats = parser->splitGameStateMessage(message->payload);
             std::vector<std::string> result = parser->splitMessage(message->payload);
             emit gameState(result);
@@ -120,7 +120,7 @@ void TcpClient::onReadyRead()
     delete message;
 }
 
-void TcpClient::sendMessage(Request::Type type, const QString &payload)
+void TcpClient::sendMessage(ClientMessageTypes::Type type, const QString &payload)
 {
     Message *message = new Message();
     message->type = type;
@@ -133,30 +133,30 @@ void TcpClient::sendMessage(Request::Type type, const QString &payload)
 
 void TcpClient::nicknameReceived(const QString &nickname)
 {
-    sendMessage(Request::LOGIN, nickname);
+    sendMessage(ClientMessageTypes::LOGIN, nickname);
 }
 
 void TcpClient::createRoomReceived()
 {
-    sendMessage(Request::CREATE_ROOM, "");
+    sendMessage(ClientMessageTypes::CREATE_ROOM, "");
 }
 
 void TcpClient::joinRoomReceived(const QString &roomId, const QString &roomPin)
 {
-    sendMessage(Request::JOIN_ROOM, roomId + "|" + roomPin);
+    sendMessage(ClientMessageTypes::JOIN_ROOM, roomId + "|" + roomPin);
 }
 
 void TcpClient::leaveRoomReceived()
 {
-    sendMessage(Request::LEAVE_ROOM, "");
+    sendMessage(ClientMessageTypes::LEAVE_ROOM, "");
 }
 
 void TcpClient::startGameReceived()
 {
-    sendMessage(Request::START_GAME, "");
+    sendMessage(ClientMessageTypes::START_GAME, "");
 };
 
 void TcpClient::guessReceived(const QString &letter)
 {
-    sendMessage(Request::GUESS, letter);
+    sendMessage(ClientMessageTypes::GUESS, letter);
 };

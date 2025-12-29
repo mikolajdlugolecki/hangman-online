@@ -121,7 +121,7 @@ void Server::handleClient(const size_t client_index)
 
         while (this->parser->parse(client->buffer, client->message))
         {
-			if(client->message->type != Request::PONG)
+			if(client->message->type != ClientMessageTypes::PONG)
 			{
 				writeDebugLog(client,
 					"Message received. type = " + std::to_string(client->message->type) + " Payload " +
@@ -168,7 +168,7 @@ void Server::startGame(const Client *roomOwner) const
 
 void Server::checkGuess(Client *client, const std::string &letter)
 {
-    const auto *room = findRoom(client);
+    const auto *room = client->room;
 
     if (room == nullptr)
     {
@@ -179,14 +179,14 @@ void Server::checkGuess(Client *client, const std::string &letter)
     auto positions = room->game->letterInWord(letter);
     if (!positions.empty())
     {
-        this->sendMessage(client, Response::GUESS_OK, positions);
+        this->sendMessage(client, ServerMessageTypes::GUESS_OK, positions);
     }
     else
     {
         if (++client->errors == room->game->maxErrors)
         {
         }
-        this->sendMessage(client, Response::GUESS_WRONG, "");
+        this->sendMessage(client, ServerMessageTypes::GUESS_WRONG, "");
     }
 
 	room->broadcastPlayersGameStats();
@@ -198,7 +198,7 @@ void Server::checkGuess(Client *client, const std::string &letter)
 void Server::createNewRoom(Client *client)
 {
     auto room = std::make_unique<Room>(this, client);
-    this->sendMessage(client, Response::ROOM_CREATED, room->id + "|" + room->pin);
+    this->sendMessage(client, ServerMessageTypes::ROOM_CREATED, room->id + "|" + room->pin);
     writeDebugLog(client, "Room created ID = " + room->id + " PIN = " + room->pin);
     this->rooms.push_back(std::move(room));
 }
@@ -209,21 +209,21 @@ void Server::joinRoom(Client *client, const std::string &id, const std::string &
 
     if (room == nullptr)
     {
-        this->sendMessage(client, Response::ROOM_FAILED, "Room not found. Wrong room id.");
+        this->sendMessage(client, ServerMessageTypes::ROOM_FAILED, "Room not found. Wrong room id.");
         writeDebugLog(client, "Room not found ID = " + id);
         return;
     }
 
     if (pin != room->pin)
     {
-        this->sendMessage(client, Response::ROOM_FAILED, "Wrong pin!");
+        this->sendMessage(client, ServerMessageTypes::ROOM_FAILED, "Wrong pin!");
         writeDebugLog(client, "Wrong room pin ID = " + room->id);
         return;
     }
 
     room->join(client);
 
-    this->sendMessage(client, Response::ROOM_OK, "");
+    this->sendMessage(client, ServerMessageTypes::ROOM_OK, "");
     room->broadcastPlayersListLobby();
 
     writeDebugLog(client, "Joined room ID = " + room->id);
@@ -245,7 +245,7 @@ void Server::leaveRoom(const Client *client)
     if (newOwner != nullptr)
     {
         writeDebugLog(newOwner, "New owner of room ID = " + room->id);
-        this->sendMessage(newOwner, Response::ROOM_OWNERSHIP_TRANSFER, "");
+        this->sendMessage(newOwner, ServerMessageTypes::ROOM_OWNERSHIP_TRANSFER, "");
     }
 }
 
@@ -253,20 +253,20 @@ void Server::handleMessage(Client *client, const Message *message)
 {
     switch (message->type)
     {
-    case Request::LOGIN:
+    case ClientMessageTypes::LOGIN:
         if (validateNickname(client, message->payload))
         {
-            this->sendMessage(client, Response::LOGIN_OK, "");
+            this->sendMessage(client, ServerMessageTypes::LOGIN_OK, "");
         }
         else
         {
-            this->sendMessage(client, Response::LOGIN_FAILED, "Nickname is already in use");
+            this->sendMessage(client, ServerMessageTypes::LOGIN_FAILED, "Nickname is already in use");
         }
         break;
-    case Request::CREATE_ROOM:
+    case ClientMessageTypes::CREATE_ROOM:
         createNewRoom(client);
         break;
-    case Request::JOIN_ROOM:
+    case ClientMessageTypes::JOIN_ROOM:
     {
         const std::vector<std::string> result = parser->splitMessage(message->payload);
         const std::string &room_id = result[0];
@@ -274,18 +274,18 @@ void Server::handleMessage(Client *client, const Message *message)
         joinRoom(client, room_id, room_pin);
     }
     break;
-    case Request::LEAVE_ROOM:
+    case ClientMessageTypes::LEAVE_ROOM:
         leaveRoom(client);
         break;
-    case Request::START_GAME:
+    case ClientMessageTypes::START_GAME:
         startGame(client);
         break;
-    case Request::PONG:
+    case ClientMessageTypes::PONG:
     {
 		client->pongReceived();
     }
     break;
-    case Request::GUESS:
+    case ClientMessageTypes::GUESS:
         checkGuess(client, message->payload);
         break;
     default:
@@ -293,7 +293,7 @@ void Server::handleMessage(Client *client, const Message *message)
     }
 }
 
-void Server::sendMessage(const Client *client, const Response::Type type, const std::string &payload)
+void Server::sendMessage(const Client *client, const ServerMessageTypes::Type type, const std::string &payload)
 {
     client->message->type = type;
     client->message->length = payload.size();

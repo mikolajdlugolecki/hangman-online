@@ -22,7 +22,7 @@ public:
     Room(Server *server, Client *owner);
     ~Room();
     void addClient(Client client);
-    void broadcastMessage(Response::Type type, const std::string &payload) const;
+    void broadcastMessage(ServerMessageTypes::Type type, const std::string &payload) const;
     void broadcastPlayersListLobby() const;
     void broadcastPlayersListGame() const;
     void broadcastPlayersGameStats() const;

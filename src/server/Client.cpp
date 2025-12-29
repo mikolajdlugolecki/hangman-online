@@ -32,7 +32,7 @@ void Client::tick(Server *server)
         pingIntervalCounterSeconds = PING_INTERVAL_SECONDS;
         pongTimeoutCountersSeconds.push_back(PONG_TIMEOUT);
         // server->write_debug_log(this, "Sending ping");
-        server->sendMessage(this, Response::PING, "");
+        server->sendMessage(this, ServerMessageTypes::PING, "");
     }
 
     for (auto &p : pongTimeoutCountersSeconds)

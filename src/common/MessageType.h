@@ -1,8 +1,7 @@
 #ifndef MESSAGETYPE_H
 #define MESSAGETYPE_H
 
-// Send by client
-namespace Request
+namespace ClientMessageTypes
 {
 enum Type
 {                // PAYLOADS:
@@ -20,8 +19,7 @@ enum Type
 };
 } // namespace Request
 
-// Send by server
-namespace Response
+namespace ServerMessageTypes
 {
 enum Type
 {                            // PAYLOADS:

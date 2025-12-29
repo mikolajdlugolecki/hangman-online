@@ -29,7 +29,7 @@ protected:
     void onTimeout();
     void onDisconnected();
     void onReadyRead();
-    void sendMessage(Request::Type type, const QString &nickname);
+    void sendMessage(ClientMessageTypes::Type type, const QString &nickname);
 
 private:
     Parser *parser = new Parser();

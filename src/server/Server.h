@@ -17,7 +17,7 @@ public:
     explicit Server(int port);
     ~Server();
     void run();
-    void sendMessage(const Client *client, Response::Type type, const std::string &payload);
+    void sendMessage(const Client *client, ServerMessageTypes::Type type, const std::string &payload);
     static void writeDebugLog(const Client *client, const std::string &message);
 
 private:
@@ -36,7 +36,6 @@ private:
     void joinRoom(Client *client, const std::string &id, const std::string &pin);
     void leaveRoom(const Client *client);
     Room *findRoom(const std::string &id) const;
-    Room *findRoom(const Client *client) const;
     void startGame(const Client *roomOwner) const;
     void timerThread();
     void checkGuess(Client *client, const std::string &letter);
