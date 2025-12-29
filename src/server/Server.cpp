@@ -5,6 +5,7 @@
 #include "Serializer.h"
 
 #include <cstdlib>
+#include <fcntl.h>
 #include <fstream>
 #include <iostream>
 #include <netinet/in.h>
@@ -21,7 +22,7 @@ void Server::timerThread()
 
         for (const auto &client : this->clients)
         {
-            client->tick(this);
+            client->tick();
         }
     }
 }
@@ -91,10 +92,14 @@ void Server::acceptNewClient()
         perror("Error accepting new client");
         return;
     }
-
+    if (fcntl(clientSocket, F_SETFL, fcntl(clientSocket, F_GETFL) | O_NONBLOCK) == -1)
+    {
+        perror("Error changing client's socket settings");
+        return;
+    }
     pollfd pfd{};
     pfd.fd = clientSocket;
-    pfd.events = POLLIN;
+    pfd.events = POLLIN | POLLOUT;
     this->clients.push_back(std::make_unique<Client>(clientSocket, clientAddress));
     this->pfds.push_back(pfd);
     Utils::writeDebugLog(clients.back().get(), "New client accepted");
@@ -107,7 +112,7 @@ void Server::handleClient(const size_t client_index)
         char buffer[MSG_SIZE]{};
         Client *client = this->clients[client_index - 1].get();
         const size_t bytes = read(client->socket, buffer, MSG_SIZE);
-        client->buffer.insert(client->buffer.end(), buffer, buffer + bytes);
+        client->receivingBuffer.insert(client->receivingBuffer.end(), buffer, buffer + bytes);
 
         if (bytes == 0)
         {
@@ -119,20 +124,26 @@ void Server::handleClient(const size_t client_index)
             return;
         }
 
-        while (this->parser->parse(client->buffer, client->message))
+        while (this->parser->parse(client->receivingBuffer, client->message))
         {
-			if(client->message->type != ClientMessageTypes::PONG)
-			{
-				Utils::writeDebugLog(client,
-					"Message received. type = " + std::to_string(client->message->type) + " Payload " +
-					client->message->payload);
-			}
+            if (client->message->type != ClientMessageTypes::PONG)
+            {
+                Utils::writeDebugLog(client,
+                                     "Message received. type = " + std::to_string(client->message->type) + " Payload " +
+                                         client->message->payload);
+            }
             // auto buf = Serializer::serialize(*client->message);
             // for (unsigned char c : buf)
             // 	std::cout << std::hex << (int)c << " ";
             // std::cout << std::endl;
             this->handleMessage(client, client->message);
         }
+    }
+
+    if (this->pfds[client_index].revents & POLLOUT)
+    {
+        Client *client = this->clients[client_index - 1].get();
+        this->sendBufferData(client);
     }
 }
 
@@ -159,7 +170,7 @@ void Server::checkGuess(Client *client, const char &letter)
         return;
     }
 
-	auto stats = room->gameStats.at(client).get();
+    auto stats = room->gameStats.at(client).get();
 
 	if(stats->errors >= room->game->maxErrors)
 	{
@@ -176,25 +187,22 @@ void Server::checkGuess(Client *client, const char &letter)
     {
 		stats->letterGuessed(room->game->word, letter);
 
-        this->sendMessage(client, ServerMessageTypes::GUESS_OK, stats->wordWithHiddenChars);
+        client->addMessageToBuffer(ServerMessageTypes::GUESS_OK, stats->wordWithHiddenChars);
     }
     else
     {
 		stats->errors++;
-        this->sendMessage(client, ServerMessageTypes::GUESS_WRONG, "");
+        client->addMessageToBuffer(ServerMessageTypes::GUESS_WRONG, "");
     }
 
-	stats->recalculateScore();
-	room->broadcastPlayersGameStats();
-    // terminate called after throwing an instance of 'std::length_error'
-    // what():  vector::_M_range_insert
-    // room->broadcastPlayersGameStats();
+    stats->recalculateScore();
+    room->broadcastPlayersGameStats();
 }
 
 void Server::createNewRoom(Client *client)
 {
     auto room = std::make_unique<Room>(this, client);
-    this->sendMessage(client, ServerMessageTypes::ROOM_CREATED, room->id + "|" + room->pin);
+    client->addMessageToBuffer(ServerMessageTypes::ROOM_CREATED, room->id + "|" + room->pin);
     Utils::writeDebugLog(client, "Room created ID = " + room->id + " PIN = " + room->pin);
     this->rooms.push_back(std::move(room));
 }
@@ -205,21 +213,21 @@ void Server::joinRoom(Client *client, const std::string &id, const std::string &
 
     if (room == nullptr)
     {
-        this->sendMessage(client, ServerMessageTypes::ROOM_FAILED, "Room not found. Wrong room id.");
+        client->addMessageToBuffer(ServerMessageTypes::ROOM_FAILED, "Room not found. Wrong room id.");
         Utils::writeDebugLog(client, "Room not found ID = " + id);
         return;
     }
 
     if (pin != room->pin)
     {
-        this->sendMessage(client, ServerMessageTypes::ROOM_FAILED, "Wrong pin!");
+        client->addMessageToBuffer(ServerMessageTypes::ROOM_FAILED, "Wrong pin!");
         Utils::writeDebugLog(client, "Wrong room pin ID = " + room->id);
         return;
     }
 
     room->join(client);
+    client->addMessageToBuffer(ServerMessageTypes::ROOM_OK, "");
 
-    this->sendMessage(client, ServerMessageTypes::ROOM_OK, "");
     room->broadcastPlayersListLobby();
 
     Utils::writeDebugLog(client, "Joined room ID = " + room->id);
@@ -235,13 +243,13 @@ void Server::leaveRoom(const Client *client)
         return;
     }
 
-    const auto *newOwner = room->leave(client);
+    auto *newOwner = room->leave(client);
     Utils::writeDebugLog(client, "Client left room ID = " + room->id);
 
     if (newOwner != nullptr)
     {
         Utils::writeDebugLog(newOwner, "New owner of room ID = " + room->id);
-        this->sendMessage(newOwner, ServerMessageTypes::ROOM_OWNERSHIP_TRANSFER, "");
+        newOwner->addMessageToBuffer(ServerMessageTypes::ROOM_OWNERSHIP_TRANSFER, "");
     }
 }
 
@@ -252,11 +260,11 @@ void Server::handleMessage(Client *client, const Message *message)
     case ClientMessageTypes::LOGIN:
         if (validateNickname(client, message->payload))
         {
-            this->sendMessage(client, ServerMessageTypes::LOGIN_OK, "");
+            client->addMessageToBuffer(ServerMessageTypes::LOGIN_OK, "");
         }
         else
         {
-            this->sendMessage(client, ServerMessageTypes::LOGIN_FAILED, "Nickname is already in use");
+            client->addMessageToBuffer(ServerMessageTypes::LOGIN_FAILED, "Nickname is already in use");
         }
         break;
     case ClientMessageTypes::CREATE_ROOM:
@@ -264,7 +272,7 @@ void Server::handleMessage(Client *client, const Message *message)
         break;
     case ClientMessageTypes::JOIN_ROOM:
     {
-        const std::vector<std::string> result = parser->splitMessage(message->payload);
+        const std::vector<std::string> result = Parser::splitMessage(message->payload);
         const std::string &room_id = result[0];
         const std::string &room_pin = result[1];
         joinRoom(client, room_id, room_pin);
@@ -278,7 +286,7 @@ void Server::handleMessage(Client *client, const Message *message)
         break;
     case ClientMessageTypes::PONG:
     {
-		client->pongReceived();
+        client->pongReceived();
     }
     break;
     case ClientMessageTypes::GUESS:
@@ -289,18 +297,6 @@ void Server::handleMessage(Client *client, const Message *message)
     default:
         break;
     }
-}
-
-void Server::sendMessage(const Client *client, const ServerMessageTypes::Type type, const std::string &payload)
-{
-    client->message->type = type;
-    client->message->length = payload.size();
-    client->message->payload = payload;
-    // auto buf = Serializer::serialize(*client->message);
-    // for (unsigned char c : buf)
-    // 	std::cout << std::hex << (int)c << " ";
-    // std::cout << std::endl;
-    write(client->socket, Serializer::serialize(*client->message).data(), HEADER_SIZE + client->message->length);
 }
 
 bool Server::validateNickname(Client *client, const std::string &nickname) const
@@ -330,4 +326,20 @@ void Server::run()
             this->handleClient(i);
         }
     }
+}
+
+void Server::sendBufferData(Client *client) const
+{
+    const size_t minSize = std::min(static_cast<size_t>(MSG_SIZE), client->sendingBuffer.size());
+    const auto buffer = new char[minSize];
+    for (size_t i = 0; i < minSize; i++)
+    {
+        buffer[i] = client->sendingBuffer[i];
+    }
+    const size_t bytesSent = write(client->socket, buffer, minSize);
+    for (size_t i = 0; i < bytesSent; i++)
+    {
+        client->sendingBuffer.pop_front();
+    }
+    delete[] buffer;
 }

@@ -3,7 +3,9 @@
 
 #include "Constants.h"
 #include "Message.h"
+#include "MessageType.h"
 
+#include <deque>
 #include <netinet/in.h>
 #include <vector>
 #include <mutex>
@@ -17,7 +19,8 @@ public:
     int socket;
     sockaddr_in address{};
     Message *message;
-    std::vector<char> buffer;
+    std::vector<char> receivingBuffer;
+    std::deque<char> sendingBuffer;
 
     std::string nickname;
     Room *room = nullptr;
@@ -30,9 +33,9 @@ public:
 
     Client(int inSocket, sockaddr_in inAddress);
     ~Client();
-
+    void addMessageToBuffer(ServerMessageTypes::Type type, const std::string &payload);
     std::string addressToString() const;
-    void tick(Server *server);
+    void tick();
     void pongReceived();
 };
 

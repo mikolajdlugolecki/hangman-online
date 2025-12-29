@@ -18,7 +18,7 @@ public:
     explicit Server(int port);
     ~Server();
     void run();
-    void sendMessage(const Client *client, ServerMessageTypes::Type type, const std::string &payload);
+    void sendBufferData(Client *client) const;
 
 private:
     int socket{};

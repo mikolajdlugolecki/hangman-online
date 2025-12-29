@@ -1,6 +1,7 @@
 #include "Client.h"
 
 #include "Room.h"
+#include "Serializer.h"
 #include "Server.h"
 
 #include <arpa/inet.h>
@@ -17,12 +18,25 @@ Client::~Client()
     delete message;
 }
 
+void Client::addMessageToBuffer(ServerMessageTypes::Type type, const std::string &payload)
+{
+    this->message->type = type;
+    this->message->length = payload.size();
+    this->message->payload = payload;
+    // auto buf = Serializer::serialize(*client->message);
+    // for (unsigned char c : buf)
+    // 	std::cout << std::hex << (int)c << " ";
+    // std::cout << std::endl;
+    auto buf = Serializer::serialize(*this->message);
+    this->sendingBuffer.insert(this->sendingBuffer.begin(), buf.begin(), buf.end());
+}
+
 std::string Client::addressToString() const
 {
     return std::string(inet_ntoa(this->address.sin_addr)) + ":" + std::to_string(ntohs(this->address.sin_port));
 }
 
-void Client::tick(Server *server)
+void Client::tick()
 {
     std::lock_guard<std::mutex> lock(pingPongMutex);
 
@@ -32,7 +46,7 @@ void Client::tick(Server *server)
         pingIntervalCounterSeconds = PING_INTERVAL_SECONDS;
         pongTimeoutCountersSeconds.push_back(PONG_TIMEOUT);
         // server->write_debug_log(this, "Sending ping");
-        server->sendMessage(this, ServerMessageTypes::PING, "");
+        this->addMessageToBuffer(ServerMessageTypes::PING, "");
     }
 
     for (auto &p : pongTimeoutCountersSeconds)

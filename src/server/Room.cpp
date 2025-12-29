@@ -37,7 +37,7 @@ void Room::broadcastMessage(const ServerMessageTypes::Type type, const std::stri
 {
     for (const auto client : this->clients)
     {
-        this->server->sendMessage(client, type, payload);
+        client->addMessageToBuffer(type, payload);
     }
 }
 
