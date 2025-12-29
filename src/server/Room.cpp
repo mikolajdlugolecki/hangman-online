@@ -41,14 +41,14 @@ void Room::broadcastMessage(const ServerMessageTypes::Type type, const std::stri
     }
 }
 
-static std::string padLeft(const std::string &str, const size_t totalWidth, const char padChar = ' ')
-{
-    if (str.length() >= totalWidth)
-    {
-        return str;
-    }
-    return std::string(totalWidth - str.length(), padChar) + str;
-}
+// static std::string padLeft(const std::string &str, const size_t totalWidth, const char padChar = ' ')
+// {
+//     if (str.length() >= totalWidth)
+//     {
+//         return str;
+//     }
+//     return std::string(totalWidth - str.length(), padChar) + str;
+// }
 
 static std::string padRight(const std::string &str, const size_t totalWidth, const char padChar = ' ')
 {

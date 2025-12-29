@@ -25,7 +25,6 @@ public:
 
     Room(Server *server, Client *owner);
     ~Room();
-    void addClient(Client client);
     void broadcastMessage(ServerMessageTypes::Type type, const std::string &payload) const;
     void broadcastPlayersListLobby() const;
     void broadcastPlayersListGame() const;
