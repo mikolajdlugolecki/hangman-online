@@ -70,6 +70,7 @@ void GameWidget::guessIncorrect()
 
 void GameWidget::gameStatsReceived(std::vector<std::string> stats)
 {
+    ui->listWidget->clear();
     for(auto &stat : stats)
     {
         ui->listWidget->addItem(QString::fromStdString(stat));

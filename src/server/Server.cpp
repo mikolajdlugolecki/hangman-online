@@ -176,19 +176,26 @@ void Server::checkGuess(Client *client, const std::string &letter)
         return;
     }
 
+	auto stats = room->gameStats.at(client).get();
+
     auto positions = room->game->letterInWord(letter);
     if (!positions.empty())
     {
+		stats->letterGuessed(room->game->word, letter[0]);
+
         this->sendMessage(client, ServerMessageTypes::GUESS_OK, positions);
     }
     else
     {
+		stats->errors++;
+
         if (++client->errors == room->game->maxErrors)
         {
         }
         this->sendMessage(client, ServerMessageTypes::GUESS_WRONG, "");
     }
 
+	stats->recalculateScore();
 	room->broadcastPlayersGameStats();
     // terminate called after throwing an instance of 'std::length_error'
     // what():  vector::_M_range_insert

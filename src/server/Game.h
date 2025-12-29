@@ -15,8 +15,8 @@ public:
     std::string getGameStartedPayload() const;
     std::string letterInWord(const std::string &letter);
 
-private:
     std::string word;
+private:
     static std::vector<std::string> availableWords;
 
     Game(unsigned short int maxErrors, unsigned short int maxSeconds);

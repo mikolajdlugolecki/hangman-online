@@ -8,6 +8,8 @@
 
 Room::Room(Server *server, Client *owner)
 {
+    owner->room = this;
+    gameStats[owner] = std::make_shared<GameStats>(this);
     this->server = server;
     this->owner = owner;
     this->clients.push_back(owner);
@@ -141,9 +143,11 @@ void Room::broadcastPlayersGameStats() const
 
         auto connectionState = (client->isConnected ? "connected" : "disconnected");
 
+        std::shared_ptr<GameStats> stats = gameStats.at(client);
+
         payload += padRight(client->nickname, maxNicknameSize) +
-        padRight("15/100", 8) +
-        padRight("2/7", 8) + 
+        padRight(std::to_string(stats.get()->score) + "/100", 8) +
+        padRight(std::to_string(stats.get()->errors) + "/" + std::to_string(game->maxErrors), 8) + 
         connectionState;
 
         if (i != this->clients.size() - 1)
@@ -159,6 +163,7 @@ void Room::broadcastPlayersGameStats() const
 void Room::join(Client *client)
 {
     this->clients.push_back(client);
+    gameStats[client] = std::make_shared<GameStats>(this);
     client->room = this;
     broadcastPlayersListLobby();
 }
@@ -211,6 +216,12 @@ bool Room::isClientInRoom(const Client *client) const
 
 void Room::startGame()
 {
+    gameStats.clear();
+    for (auto client : this->clients)
+    {
+        gameStats[client] = std::make_shared<GameStats>(this);
+    }
+
     this->game = Game::create(10, 60);
     isGameStarted = true;
     broadcastMessage(ServerMessageTypes::GAME_STARTED, this->game->getGameStartedPayload());

@@ -4,9 +4,12 @@
 #include "Client.h"
 #include "MessageType.h"
 #include "Parser.h"
+#include "GameStats.h"
 
 #include <random>
 #include <vector>
+#include <unordered_map>
+#include <memory>
 
 class Game;
 class Server;
@@ -18,6 +21,7 @@ public:
     std::string pin;
     Game *game;
     bool isGameStarted = false;
+    std::unordered_map<Client*, std::shared_ptr<GameStats>> gameStats;
 
     Room(Server *server, Client *owner);
     ~Room();
