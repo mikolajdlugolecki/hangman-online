@@ -121,9 +121,12 @@ void Server::handleClient(const size_t client_index)
 
         while (this->parser->parse(client->buffer, client->message))
         {
-            writeDebugLog(client,
-                          "Message received. type = " + std::to_string(client->message->type) + " Payload " +
-                              client->message->payload);
+			if(client->message->type != Request::PONG)
+			{
+				writeDebugLog(client,
+					"Message received. type = " + std::to_string(client->message->type) + " Payload " +
+					client->message->payload);
+			}
             // auto buf = Serializer::serialize(*client->message);
             // for (unsigned char c : buf)
             // 	std::cout << std::hex << (int)c << " ";

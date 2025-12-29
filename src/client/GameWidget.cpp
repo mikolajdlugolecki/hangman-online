@@ -75,7 +75,7 @@ void GameWidget::gameStatsReceived(std::vector<std::vector<std::string>> stats)
     {
         int row = ui->statsTable->rowCount();
         ui->statsTable->insertRow(row);
-        for (size_t i = 0; dataRow.size(); i++)
+        for (size_t i = 0; i < dataRow.size(); i++)
         {
             ui->statsTable->setItem(row, i, new QTableWidgetItem(QString::fromStdString(dataRow[i])));
         }

@@ -4,6 +4,11 @@
 #include <QTimer>
 #include <QWidget>
 
+#include <QPushButton>
+#include <QLineEdit>
+#include <QTableWidgetItem>
+#include <QAbstractItemView>
+
 namespace Ui
 {
 class GameWidget;
