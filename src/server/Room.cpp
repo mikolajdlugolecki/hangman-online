@@ -214,7 +214,7 @@ bool Room::isClientInRoom(const Client *client) const
 
 void Room::startGame()
 {
-    this->game = Game::create(10, 60);
+    this->game = std::make_unique<Game>(10, 60);
     isGameStarted = true;
 
     gameStats.clear();

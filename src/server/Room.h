@@ -19,7 +19,7 @@ class Room
 public:
     std::string id;
     std::string pin;
-    Game *game;
+    std::unique_ptr<Game> game;
     bool isGameStarted = false;
     std::unordered_map<Client*, std::shared_ptr<GameStats>> gameStats;
 

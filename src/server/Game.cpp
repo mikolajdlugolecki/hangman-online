@@ -5,11 +5,6 @@
 #include <fstream>
 #include <random>
 
-Game *Game::create(const unsigned short int maxErrors, const unsigned short int maxSeconds)
-{
-    return new Game(maxErrors, maxSeconds);
-}
-
 std::string Game::getGameStartedPayload() const
 {
     return std::to_string(this->wordLength) + "|" + std::to_string(this->maxErrors) + "|" +
