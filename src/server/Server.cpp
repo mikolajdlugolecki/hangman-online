@@ -4,6 +4,7 @@
 #include "Game.h"
 #include "Serializer.h"
 
+#include <atomic>
 #include <cstdlib>
 #include <fcntl.h>
 #include <fstream>
@@ -27,7 +28,7 @@ void Server::timerThread()
     }
 }
 
-Server::Server(const int port)
+Server::Server(const int port, std::atomic<bool>& running) : running(running)
 {
     this->socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (this->socket == -1)
@@ -311,7 +312,7 @@ bool Server::validateNickname(Client *client, const std::string &nickname) const
 
 void Server::run()
 {
-    while (true)
+    while (this->running.load())
     {
         poll(this->pfds.data(), this->pfds.size(), -1);
         if (pfds[0].revents & POLLIN)

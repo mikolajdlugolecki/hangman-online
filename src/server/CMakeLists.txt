@@ -30,4 +30,6 @@ target_include_directories(server PRIVATE
         ../common
 )
 
-target_compile_options(server PRIVATE -Wall -Wextra -g)
+target_compile_options(server PRIVATE -Wall -Wextra -g -fsanitize=address -fno-omit-frame-pointer)
+
+target_link_options(server PRIVATE -fsanitize=address)

@@ -68,4 +68,6 @@ target_link_libraries(Client
         Qt::Network
 )
 
-target_compile_options(Client PRIVATE -Wall -Wextra -g)
+target_compile_options(Client PRIVATE -Wall -Wextra -g -fsanitize=address -fno-omit-frame-pointer)
+
+target_link_options(Client PRIVATE -fsanitize=address)

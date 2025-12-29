@@ -15,7 +15,7 @@
 class Server
 {
 public:
-    explicit Server(int port);
+    Server(int port, std::atomic<bool>& running);
     ~Server();
     void run();
     void sendBufferData(Client *client) const;
@@ -27,6 +27,7 @@ private:
     std::vector<std::unique_ptr<Client>> clients;
     std::vector<pollfd> pfds;
     std::vector<std::unique_ptr<Room>> rooms;
+    std::atomic<bool>& running;
 
     void acceptNewClient();
     void handleClient(size_t client_index);
