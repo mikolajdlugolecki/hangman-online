@@ -15,6 +15,7 @@ class LoginWidget : public QWidget
     Q_OBJECT
 public:
     explicit LoginWidget(QWidget *parent = nullptr);
+    ~LoginWidget();
     void loginButtonHit();
     void nicknameError(const QString error);
 

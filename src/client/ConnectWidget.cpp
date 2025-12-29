@@ -11,7 +11,10 @@ ConnectWidget::ConnectWidget(QWidget *parent) : QWidget(parent), ui(new Ui::Conn
     connect(ui->hostLineEdit, &QLineEdit::returnPressed, ui->connectBtn, &QPushButton::click);
 }
 
-ConnectWidget::~ConnectWidget() {}
+ConnectWidget::~ConnectWidget()
+{
+    delete ui;
+}
 
 void ConnectWidget::connectButtonHit()
 {

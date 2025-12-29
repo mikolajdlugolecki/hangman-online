@@ -15,6 +15,11 @@ TcpClient::TcpClient(QObject *parent) : QObject(parent)
     connect(socket, &QTcpSocket::readyRead, this, &TcpClient::onReadyRead);
 }
 
+TcpClient::~TcpClient()
+{
+    delete parser;
+}
+
 void TcpClient::connectToServer(const QString &host, quint16 port)
 {
     timer->start(3000);

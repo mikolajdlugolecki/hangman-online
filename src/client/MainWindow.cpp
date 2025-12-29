@@ -98,3 +98,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(client, &TcpClient::guessIncorrect, GameScene, &GameWidget::guessIncorrect);
     connect(client, &TcpClient::gameState, GameScene, &GameWidget::gameStatsReceived);
 }
+
+MainWindow::~MainWindow()
+{
+    delete client;
+    delete ConnectScene;
+    delete LoginScene;
+    delete MenuScene;
+    delete LobbyScene;
+    delete GameScene;
+}

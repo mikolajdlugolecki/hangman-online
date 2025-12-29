@@ -14,6 +14,7 @@ class TcpClient : public QObject
     Q_OBJECT
 public:
     explicit TcpClient(QObject *parent = nullptr);
+    ~TcpClient();
     void connectToServer(const QString &host, quint16 port);
     void nicknameReceived(const QString &nickname);
     void createRoomReceived();

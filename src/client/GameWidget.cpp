@@ -12,6 +12,11 @@ GameWidget::GameWidget(QWidget *parent) : QWidget(parent), ui(new Ui::GameWidget
     connect(timer, &QTimer::timeout, this, &GameWidget::updateTime);
 }
 
+GameWidget::~GameWidget()
+{
+    delete ui;
+}
+
 void GameWidget::init(const QString wordLength, const QString maxErrors, const QString maxSeconds, const QString coveredWord)
 {
     GameState::instance().wordWithHiddenChars = coveredWord;

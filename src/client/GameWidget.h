@@ -19,6 +19,7 @@ class GameWidget : public QWidget
     Q_OBJECT
 public:
     explicit GameWidget(QWidget *parent = nullptr);
+    ~GameWidget();
     void init(const QString wordLength, const QString maxErrors, const QString maxSeconds, const QString coveredWord);
     void guessCorrect(QString newWordWithHiddenChars);
     void guessIncorrect();

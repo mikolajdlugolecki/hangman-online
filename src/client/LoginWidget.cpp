@@ -11,6 +11,11 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent), ui(new Ui::LoginWid
     connect(ui->loginLineEdit, &QLineEdit::returnPressed, ui->loginBtn, &QPushButton::click);
 }
 
+LoginWidget::~LoginWidget()
+{
+    delete ui;
+}
+
 void LoginWidget::loginButtonHit()
 {
     QString nickname = ui->loginLineEdit->text();

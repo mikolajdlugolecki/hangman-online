@@ -14,6 +14,11 @@ MenuWidget::MenuWidget(QWidget *parent) : QWidget(parent), ui(new Ui::MenuWidget
     connect(ui->roomPinLineEdit, &QLineEdit::textChanged, this, &MenuWidget::validateData);
 }
 
+MenuWidget::~MenuWidget()
+{
+    delete ui;
+}
+
 void MenuWidget::createRoomButtonHit()
 {
     emit createRoomRequested();
