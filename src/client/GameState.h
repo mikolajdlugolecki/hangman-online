@@ -23,7 +23,7 @@ public:
     QString wordLength;
     int currentErrors;
     QString maxErrors;
-    std::vector<char> word;
+    QString wordWithHiddenChars;
     QString lastGuessedLetter;
 
 private:

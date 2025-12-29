@@ -13,30 +13,14 @@ Game *Game::create(const unsigned short int maxErrors, const unsigned short int 
 std::string Game::getGameStartedPayload() const
 {
     return std::to_string(this->wordLength) + "|" + std::to_string(this->maxErrors) + "|" +
-           std::to_string(this->maxSeconds);
+           std::to_string(this->maxSeconds) + "|" + wordWithHiddenChars;
 }
 
-std::string Game::letterInWord(const std::string &letter)
+static void stringToUpper(std::string str)
 {
-    std::vector<size_t> positions;
-
-    size_t position = this->word.find(letter, 0);
-    while (position != std::string::npos)
-    {
-        positions.push_back(position);
-        position = this->word.find(letter, position + 1);
+    for (char &c : str) {
+        c = std::toupper((unsigned char)c);
     }
-
-    std::string positionsAsString;
-    for (size_t i = 0; i < positions.size(); i++)
-    {
-        positionsAsString += std::to_string(positions[i]);
-        if (i < positions.size() - 1)
-        {
-            positionsAsString += "|";
-        }
-    }
-    return positionsAsString;
 }
 
 std::vector<std::string> Game::loadWords(const std::string &fileName)
@@ -54,6 +38,7 @@ std::vector<std::string> Game::loadWords(const std::string &fileName)
     std::string line;
     while (std::getline(file, line))
     {
+        stringToUpper(line);
         result.push_back(line);
     }
 
@@ -68,6 +53,17 @@ Game::Game(const unsigned short int maxErrors, const unsigned short int maxSecon
     std::uniform_int_distribution<> dis(0, Game::availableWords.size() - 1);
 
     this->word = Game::availableWords[dis(gen)];
+
+    std::string wordWithHiddenChars = std::string(this->word);
+    for (char &letter : wordWithHiddenChars)
+    {
+        if (letter != ' ')
+        {
+            letter = '_';
+        }
+    }
+    this->wordWithHiddenChars = wordWithHiddenChars;
+
     this->wordLength = this->word.length();
     this->maxErrors = maxErrors;
     this->maxSeconds = maxSeconds;

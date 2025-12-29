@@ -21,7 +21,6 @@ public:
 
     std::string nickname;
     Room *room = nullptr;
-    int errors;
 
     bool isConnected = true;
     bool receivedPong = false;

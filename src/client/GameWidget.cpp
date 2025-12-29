@@ -12,19 +12,18 @@ GameWidget::GameWidget(QWidget *parent) : QWidget(parent), ui(new Ui::GameWidget
     connect(timer, &QTimer::timeout, this, &GameWidget::updateTime);
 }
 
-void GameWidget::init(const QString wordLength, const QString maxErrors, const QString maxSeconds)
+void GameWidget::init(const QString wordLength, const QString maxErrors, const QString maxSeconds, const QString coveredWord)
 {
-    GameState::instance().word.clear();
+    GameState::instance().wordWithHiddenChars = coveredWord;
+    ui->maskedWordLabel->setText(transformWord(GameState::instance().wordWithHiddenChars));
+
     GameState::instance().currentErrors = 0;
+
     ui->wordLengthLabel->setText(wordLength);
     QString errorsLabel =
         QString::fromStdString(std::to_string(GameState::instance().currentErrors)) + " / " + maxErrors;
     ui->errorsLabel->setText(errorsLabel);
-    for (int i = 0; i < GameState::instance().wordLength.toInt(); i++)
-    {
-        GameState::instance().word.push_back('_');
-    }
-    ui->maskedWordLabel->setText(transformWord(GameState::instance().word));
+
     elapsedSeconds = maxSeconds.toInt();
     timer->start(1000);
     updateTime();
@@ -40,7 +39,7 @@ void GameWidget::guessButtonHit()
     emit guessRequested(letter);
 };
 
-QString GameWidget::transformWord(std::vector<char> word)
+QString GameWidget::transformWord(QString word)
 {
     QString result = "";
     for (auto &c : word)
@@ -51,14 +50,10 @@ QString GameWidget::transformWord(std::vector<char> word)
     return result;
 }
 
-void GameWidget::guessPositions(std::vector<std::string> positions)
+void GameWidget::guessCorrect(QString newWordWithHiddenChars)
 {
-    for (auto &pos : positions)
-    {
-        GameState::instance().word[std::stoi(pos)] =
-            std::toupper(GameState::instance().lastGuessedLetter.toStdString()[0]);
-    }
-    ui->maskedWordLabel->setText(transformWord(GameState::instance().word));
+    GameState::instance().wordWithHiddenChars = newWordWithHiddenChars;
+    ui->maskedWordLabel->setText(transformWord(newWordWithHiddenChars));
 }
 
 void GameWidget::guessIncorrect()

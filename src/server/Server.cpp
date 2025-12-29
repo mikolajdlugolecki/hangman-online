@@ -149,7 +149,7 @@ void Server::startGame(const Client *roomOwner) const
     room->startGame();
 }
 
-void Server::checkGuess(Client *client, const std::string &letter)
+void Server::checkGuess(Client *client, const char &letter)
 {
     const auto *room = client->room;
 
@@ -161,20 +161,26 @@ void Server::checkGuess(Client *client, const std::string &letter)
 
 	auto stats = room->gameStats.at(client).get();
 
-    auto positions = room->game->letterInWord(letter);
-    if (!positions.empty())
-    {
-		stats->letterGuessed(room->game->word, letter[0]);
+	if(stats->errors >= room->game->maxErrors)
+	{
+		return;
+	}
 
-        this->sendMessage(client, ServerMessageTypes::GUESS_OK, positions);
+	if(stats->isLetterUsed(letter))
+	{
+		return;
+	}
+	stats->markLetterAsUsed(letter);
+
+    if (stats->isLetterCorrect(letter))
+    {
+		stats->letterGuessed(room->game->word, letter);
+
+        this->sendMessage(client, ServerMessageTypes::GUESS_OK, stats->wordWithHiddenChars);
     }
     else
     {
 		stats->errors++;
-
-        if (++client->errors == room->game->maxErrors)
-        {
-        }
         this->sendMessage(client, ServerMessageTypes::GUESS_WRONG, "");
     }
 
@@ -276,8 +282,10 @@ void Server::handleMessage(Client *client, const Message *message)
     }
     break;
     case ClientMessageTypes::GUESS:
-        checkGuess(client, message->payload);
-        break;
+	{
+		char letter = (message->payload)[0];
+        checkGuess(client, letter);
+	}    
     default:
         break;
     }

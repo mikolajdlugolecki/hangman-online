@@ -13,9 +13,9 @@ public:
 
     static Game *create(unsigned short int maxErrors, unsigned short int maxSeconds);
     std::string getGameStartedPayload() const;
-    std::string letterInWord(const std::string &letter);
 
     std::string word;
+    std::string wordWithHiddenChars;
 private:
     static std::vector<std::string> availableWords;
 

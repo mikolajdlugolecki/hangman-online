@@ -93,9 +93,11 @@ void TcpClient::onReadyRead()
             std::string wordLength = result[0];
             std::string maxErrors = result[1];
             std::string maxSeconds = result[2];
+            std::string coveredWord = result[3];
             emit gameStarted(QString::fromStdString(wordLength),
                              QString::fromStdString(maxErrors),
-                             QString::fromStdString(maxSeconds));
+                             QString::fromStdString(maxSeconds),
+                             QString::fromStdString(coveredWord));
         }
         break;
         case ServerMessageTypes::PING:
@@ -103,8 +105,7 @@ void TcpClient::onReadyRead()
             break;
         case ServerMessageTypes::GUESS_OK:
         {
-            std::vector<std::string> result = parser->splitMessage(message->payload);
-            emit guessPositions(result);
+            emit guessCorrect(QString::fromStdString(message->payload));
         }
         break;
         case ServerMessageTypes::GUESS_WRONG:

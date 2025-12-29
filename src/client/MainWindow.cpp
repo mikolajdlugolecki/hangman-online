@@ -94,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     // GameWidget
     connect(GameScene, &GameWidget::guessRequested, client, &TcpClient::guessReceived);
-    connect(client, &TcpClient::guessPositions, GameScene, &GameWidget::guessPositions);
+    connect(client, &TcpClient::guessCorrect, GameScene, &GameWidget::guessCorrect);
     connect(client, &TcpClient::guessIncorrect, GameScene, &GameWidget::guessIncorrect);
     connect(client, &TcpClient::gameState, GameScene, &GameWidget::gameStatsReceived);
 }

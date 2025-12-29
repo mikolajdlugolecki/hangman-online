@@ -9,7 +9,6 @@
 Room::Room(Server *server, Client *owner)
 {
     owner->room = this;
-    gameStats[owner] = std::make_shared<GameStats>(this);
     this->server = server;
     this->owner = owner;
     this->clients.push_back(owner);
@@ -163,7 +162,7 @@ void Room::broadcastPlayersGameStats() const
 void Room::join(Client *client)
 {
     this->clients.push_back(client);
-    gameStats[client] = std::make_shared<GameStats>(this);
+    gameStats[client] = std::make_shared<GameStats>(this, game->word);
     client->room = this;
     broadcastPlayersListLobby();
 }
@@ -216,19 +215,16 @@ bool Room::isClientInRoom(const Client *client) const
 
 void Room::startGame()
 {
+    this->game = Game::create(10, 60);
+    isGameStarted = true;
+
     gameStats.clear();
     for (auto client : this->clients)
     {
-        gameStats[client] = std::make_shared<GameStats>(this);
+        gameStats[client] = std::make_shared<GameStats>(this, game->word);
     }
 
-    this->game = Game::create(10, 60);
-    isGameStarted = true;
     broadcastMessage(ServerMessageTypes::GAME_STARTED, this->game->getGameStartedPayload());
-    for (auto client : this->clients)
-    {
-        client->errors = 0;
-    }
 
     broadcastPlayersGameStats();
 }

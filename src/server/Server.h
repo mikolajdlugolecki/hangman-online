@@ -37,7 +37,7 @@ private:
     void leaveRoom(const Client *client);
     void startGame(const Client *roomOwner) const;
     void timerThread();
-    void checkGuess(Client *client, const std::string &letter);
+    void checkGuess(Client *client, const char &letter);
 };
 
 #endif

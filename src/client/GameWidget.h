@@ -19,8 +19,8 @@ class GameWidget : public QWidget
     Q_OBJECT
 public:
     explicit GameWidget(QWidget *parent = nullptr);
-    void init(const QString wordLength, const QString maxErrors, const QString maxSeconds);
-    void guessPositions(std::vector<std::string> positions);
+    void init(const QString wordLength, const QString maxErrors, const QString maxSeconds, const QString coveredWord);
+    void guessCorrect(QString newWordWithHiddenChars);
     void guessIncorrect();
     void gameStatsReceived(std::vector<std::string> stats);
 
@@ -29,7 +29,7 @@ private:
     QTimer *timer = new QTimer(this);
     int elapsedSeconds = 0;
     void guessButtonHit();
-    QString transformWord(std::vector<char> word);
+    QString transformWord(QString word);
     void updateTime();
 
 signals:
