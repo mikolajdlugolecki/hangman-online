@@ -283,7 +283,7 @@ void Server::handleMessage(Client *client, const Message *message)
     break;
     case ClientMessageTypes::GUESS:
 	{
-		char letter = (message->payload)[0];
+		char letter = std::toupper((message->payload)[0]);
         checkGuess(client, letter);
 	}    
     default:

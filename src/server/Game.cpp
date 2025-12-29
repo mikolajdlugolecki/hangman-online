@@ -16,7 +16,7 @@ std::string Game::getGameStartedPayload() const
            std::to_string(this->maxSeconds) + "|" + wordWithHiddenChars;
 }
 
-static void stringToUpper(std::string str)
+static void stringToUpper(std::string &str)
 {
     for (char &c : str) {
         c = std::toupper((unsigned char)c);
