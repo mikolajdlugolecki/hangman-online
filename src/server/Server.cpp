@@ -292,16 +292,7 @@ void Server::handleMessage(Client *client, const Message *message)
         break;
     case Request::PONG:
     {
-        client->receivedPong = true;
-        if (client->isConnected == false)
-        {
-            client->pongTimeoutCountersSeconds.clear();
-        }
-        if (!client->pongTimeoutCountersSeconds.empty())
-        {
-            client->pongTimeoutCountersSeconds.erase(client->pongTimeoutCountersSeconds.begin());
-        }
-        // writeDebugLog(client, "Pong received");
+		client->pongReceived();
     }
     break;
     case Request::GUESS:

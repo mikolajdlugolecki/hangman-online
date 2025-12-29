@@ -6,6 +6,7 @@
 
 #include <netinet/in.h>
 #include <vector>
+#include <mutex>
 
 class Room;
 class Server;
@@ -22,16 +23,18 @@ public:
     Room *room = nullptr;
     int errors;
 
-    Client(int inSocket, sockaddr_in inAddress);
-    ~Client();
-
     bool isConnected = true;
     bool receivedPong = false;
     int pingIntervalCounterSeconds = PING_INTERVAL_SECONDS;
     std::vector<int> pongTimeoutCountersSeconds;
+    std::mutex pingPongMutex;
+
+    Client(int inSocket, sockaddr_in inAddress);
+    ~Client();
 
     std::string addressToString() const;
     void tick(Server *server);
+    void pongReceived();
 };
 
 #endif

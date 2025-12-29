@@ -24,6 +24,8 @@ std::string Client::addressToString() const
 
 void Client::tick(Server *server)
 {
+    std::lock_guard<std::mutex> lock(pingPongMutex);
+
     pingIntervalCounterSeconds--;
     if (pingIntervalCounterSeconds <= 0)
     {
@@ -57,4 +59,20 @@ void Client::tick(Server *server)
             room->broadcastPlayersListGame();
         }
     }
+}
+
+void Client::pongReceived()
+{
+    std::lock_guard<std::mutex> lock(pingPongMutex);
+
+    receivedPong = true;
+    if (isConnected == false)
+    {
+        pongTimeoutCountersSeconds.clear();
+    }
+    if (pongTimeoutCountersSeconds.empty() == false)
+    {
+        pongTimeoutCountersSeconds.erase(pongTimeoutCountersSeconds.begin());
+    }
+    // writeDebugLog(client, "Pong received");
 }
