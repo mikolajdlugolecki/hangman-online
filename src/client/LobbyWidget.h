@@ -1,12 +1,13 @@
 #ifndef LOBBYWIDGET_H
 #define LOBBYWIDGET_H
 
-#include <QWidget>
 #include "GameState.h"
+
+#include <QWidget>
 
 namespace Ui
 {
-    class LobbyWidget;
+class LobbyWidget;
 }
 
 class LobbyWidget : public QWidget

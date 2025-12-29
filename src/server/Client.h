@@ -1,11 +1,11 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <vector>
-#include <netinet/in.h>
-
 #include "Constants.h"
 #include "Message.h"
+
+#include <netinet/in.h>
+#include <vector>
 
 class Room;
 class Server;
@@ -15,11 +15,11 @@ class Client
 public:
     int socket;
     sockaddr_in address{};
-    Message* message;
+    Message *message;
     std::vector<char> buffer;
 
     std::string nickname;
-    Room* room = nullptr;
+    Room *room = nullptr;
     int errors;
 
     Client(int inSocket, sockaddr_in inAddress);

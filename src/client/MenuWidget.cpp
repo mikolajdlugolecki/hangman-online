@@ -1,4 +1,5 @@
 #include "MenuWidget.h"
+
 #include "ui_MenuWidget.h"
 
 #include <QMessageBox>
@@ -18,7 +19,7 @@ void MenuWidget::createRoomButtonHit()
     emit createRoomRequested();
 }
 
-void MenuWidget::roomCreated(const QString& roomId, const QString& roomPin)
+void MenuWidget::roomCreated(const QString &roomId, const QString &roomPin)
 {
     QMessageBox::information(this, "Room created", "Room ID: " + roomId + "\nRoom PIN: " + roomPin);
 }
@@ -37,7 +38,7 @@ void MenuWidget::joinRoomButtonHit()
 
 void MenuWidget::validateData()
 {
-    if(ui->roomIdLineEdit->text().length() > 0 && ui->roomPinLineEdit->text().length() == 4)
+    if (ui->roomIdLineEdit->text().length() > 0 && ui->roomPinLineEdit->text().length() == 4)
     {
         ui->joinRoomBtn->setEnabled(true);
     }

@@ -1,15 +1,15 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QStackedWidget>
-
-#include "TcpClient.h"
 #include "ConnectWidget.h"
+#include "GameWidget.h"
+#include "LobbyWidget.h"
 #include "LoginWidget.h"
 #include "MenuWidget.h"
-#include "LobbyWidget.h"
-#include "GameWidget.h"
+#include "TcpClient.h"
+
+#include <QMainWindow>
+#include <QStackedWidget>
 
 class MainWindow : public QMainWindow
 {
@@ -18,15 +18,15 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
 
 private:
-    QStackedWidget* stack;
+    QStackedWidget *stack;
 
-    TcpClient* client;
+    TcpClient *client;
 
-    ConnectWidget* ConnectScene;
-    LoginWidget* LoginScene;
-    MenuWidget* MenuScene;
-    LobbyWidget* LobbyScene;
-    GameWidget* GameScene;
+    ConnectWidget *ConnectScene;
+    LoginWidget *LoginScene;
+    MenuWidget *MenuScene;
+    LobbyWidget *LobbyScene;
+    GameWidget *GameScene;
 };
 
 #endif // MAINWINDOW_H

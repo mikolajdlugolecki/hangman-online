@@ -1,26 +1,27 @@
 #include "Game.h"
 
+#include "Constants.h"
+
 #include <fstream>
 #include <random>
 
-#include "Constants.h"
-
-Game* Game::create(const unsigned short int maxErrors, const unsigned short int maxSeconds)
+Game *Game::create(const unsigned short int maxErrors, const unsigned short int maxSeconds)
 {
     return new Game(maxErrors, maxSeconds);
 }
 
 std::string Game::getGameStartedPayload() const
 {
-    return std::to_string(this->wordLength) + "|" + std::to_string(this->maxErrors) + "|" + std::to_string(this->maxSeconds);
+    return std::to_string(this->wordLength) + "|" + std::to_string(this->maxErrors) + "|" +
+           std::to_string(this->maxSeconds);
 }
 
-std::string Game::letterInWord(const std::string& letter)
+std::string Game::letterInWord(const std::string &letter)
 {
     std::vector<size_t> positions;
 
     size_t position = this->word.find(letter, 0);
-    while(position != std::string::npos)
+    while (position != std::string::npos)
     {
         positions.push_back(position);
         position = this->word.find(letter, position + 1);
@@ -38,7 +39,7 @@ std::string Game::letterInWord(const std::string& letter)
     return positionsAsString;
 }
 
-std::vector<std::string> Game::loadWords(const std::string& fileName)
+std::vector<std::string> Game::loadWords(const std::string &fileName)
 {
     std::fstream file;
     file.open(fileName, std::ios::in);

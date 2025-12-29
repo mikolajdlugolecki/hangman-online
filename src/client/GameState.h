@@ -8,7 +8,7 @@ class GameState : public QObject
 {
     Q_OBJECT
 public:
-    static GameState& instance()
+    static GameState &instance()
     {
         static GameState instance;
         return instance;

@@ -1,12 +1,13 @@
 #ifndef LOGINWIDGET_H
 #define LOGINWIDGET_H
 
-#include <QWidget>
 #include "GameState.h"
+
+#include <QWidget>
 
 namespace Ui
 {
-    class LoginWidget;
+class LoginWidget;
 }
 
 class LoginWidget : public QWidget
@@ -22,7 +23,7 @@ private:
 
 signals:
     void loginSuccess();
-    void nicknameSent(const QString& nickname);
+    void nicknameSent(const QString &nickname);
 };
 
 #endif // LOGINWIDGET_H

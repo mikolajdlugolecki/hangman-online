@@ -7,26 +7,26 @@
 
 namespace Ui
 {
-    class ConnectWidget;
+class ConnectWidget;
 }
 
 class ConnectWidget : public QWidget
 {
     Q_OBJECT
-  public:
+public:
     explicit ConnectWidget(QWidget *parent = 0);
     ~ConnectWidget();
     void connectionTimedOut();
     void connectionLost();
 
-  protected:
+protected:
     void connectButtonHit();
 
-  private:
+private:
     Ui::ConnectWidget *ui;
 
-  signals:
-    void connectionRequested(const QString& host, quint16 port);
+signals:
+    void connectionRequested(const QString &host, quint16 port);
 };
 
 #endif

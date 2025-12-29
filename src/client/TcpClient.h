@@ -1,26 +1,26 @@
 #ifndef TCPCLIENT_H
 #define TCPCLIENT_H
 
+#include "MessageType.h"
+#include "Parser.h"
+
 #include <QObject>
 #include <QTcpSocket>
 #include <QTimer>
 #include <QVector>
-
-#include "MessageType.h"
-#include "Parser.h"
 
 class TcpClient : public QObject
 {
     Q_OBJECT
 public:
     explicit TcpClient(QObject *parent = nullptr);
-    void connectToServer(const QString& host, quint16 port);
-    void nicknameReceived(const QString& nickname);
+    void connectToServer(const QString &host, quint16 port);
+    void nicknameReceived(const QString &nickname);
     void createRoomReceived();
-    void joinRoomReceived(const QString& roomId, const QString& roomPin);
+    void joinRoomReceived(const QString &roomId, const QString &roomPin);
     void leaveRoomReceived();
     void startGameReceived();
-    void guessReceived(const QString& letter);
+    void guessReceived(const QString &letter);
 
 protected:
     QTcpSocket *socket = new QTcpSocket(this);
@@ -29,7 +29,7 @@ protected:
     void onTimeout();
     void onDisconnected();
     void onReadyRead();
-    void sendMessage(Request::Type type, const QString& nickname);
+    void sendMessage(Request::Type type, const QString &nickname);
 
 private:
     Parser *parser = new Parser();

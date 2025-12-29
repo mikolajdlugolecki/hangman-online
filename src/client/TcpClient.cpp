@@ -3,6 +3,7 @@
 #include "Message.h"
 #include "MessageType.h"
 #include "Serializer.h"
+
 #include <sys/socket.h>
 
 TcpClient::TcpClient(QObject *parent) : QObject(parent)
@@ -14,7 +15,7 @@ TcpClient::TcpClient(QObject *parent) : QObject(parent)
     connect(socket, &QTcpSocket::readyRead, this, &TcpClient::onReadyRead);
 }
 
-void TcpClient::connectToServer(const QString& host, quint16 port)
+void TcpClient::connectToServer(const QString &host, quint16 port)
 {
     timer->start(3000);
     socket->connectToHost(host, port);
@@ -51,10 +52,12 @@ void TcpClient::onReadyRead()
 {
     QByteArray data = socket->readAll();
     buffer.insert(buffer.end(), data.begin(), data.end());
-    Message* message = new Message();
-    
-    while(this->parser->parse(buffer, message)){
-        switch(message->type){
+    Message *message = new Message();
+
+    while (this->parser->parse(buffer, message))
+    {
+        switch (message->type)
+        {
         case Response::LOGIN_OK:
             emit nicknameOK();
             break;
@@ -68,7 +71,7 @@ void TcpClient::onReadyRead()
             std::string roomPin = result[1];
             emit roomCreated(QString::fromStdString(roomId), QString::fromStdString(roomPin));
         }
-            break;
+        break;
         case Response::ROOM_OK:
             emit roomOK();
             break;
@@ -83,16 +86,18 @@ void TcpClient::onReadyRead()
             std::vector<std::string> result = parser->splitMessage(message->payload);
             emit updateLobbyPlayerList(stdVectorToQVector(result));
         }
-            break;
+        break;
         case Response::GAME_STARTED:
         {
             std::vector<std::string> result = parser->splitMessage(message->payload);
             std::string wordLength = result[0];
             std::string maxErrors = result[1];
             std::string maxSeconds = result[2];
-            emit gameStarted(QString::fromStdString(wordLength), QString::fromStdString(maxErrors), QString::fromStdString(maxSeconds));
+            emit gameStarted(QString::fromStdString(wordLength),
+                             QString::fromStdString(maxErrors),
+                             QString::fromStdString(maxSeconds));
         }
-            break;
+        break;
         case Response::PING:
             sendMessage(Request::PONG, "");
             break;
@@ -101,7 +106,7 @@ void TcpClient::onReadyRead()
             std::vector<std::string> result = parser->splitMessage(message->payload);
             emit guessPositions(result);
         }
-            break;
+        break;
         case Response::GUESS_WRONG:
             emit guessIncorrect();
             break;
@@ -114,7 +119,7 @@ void TcpClient::onReadyRead()
     delete message;
 }
 
-void TcpClient::sendMessage(Request::Type type, const QString& payload)
+void TcpClient::sendMessage(Request::Type type, const QString &payload)
 {
     Message *message = new Message();
     message->type = type;
@@ -125,7 +130,7 @@ void TcpClient::sendMessage(Request::Type type, const QString& payload)
     delete message;
 }
 
-void TcpClient::nicknameReceived(const QString& nickname)
+void TcpClient::nicknameReceived(const QString &nickname)
 {
     sendMessage(Request::LOGIN, nickname);
 }
@@ -135,7 +140,7 @@ void TcpClient::createRoomReceived()
     sendMessage(Request::CREATE_ROOM, "");
 }
 
-void TcpClient::joinRoomReceived(const QString& roomId, const QString& roomPin)
+void TcpClient::joinRoomReceived(const QString &roomId, const QString &roomPin)
 {
     sendMessage(Request::JOIN_ROOM, roomId + "|" + roomPin);
 }
@@ -150,7 +155,7 @@ void TcpClient::startGameReceived()
     sendMessage(Request::START_GAME, "");
 };
 
-void TcpClient::guessReceived(const QString& letter)
+void TcpClient::guessReceived(const QString &letter)
 {
     sendMessage(Request::GUESS, letter);
 };

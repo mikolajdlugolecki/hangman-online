@@ -1,11 +1,11 @@
 #include "Parser.h"
 
+#include "Constants.h"
+
 #include <cstring>
+#include <netinet/in.h>
 #include <sstream>
 #include <string>
-#include <netinet/in.h>
-
-#include "Constants.h"
 
 bool Parser::parse(std::vector<char> &buffer, Message *out)
 {
@@ -35,7 +35,7 @@ bool Parser::parse(std::vector<char> &buffer, Message *out)
         buffer.erase(buffer.begin(), buffer.begin() + LENGTH_SIZE);
         this->nextState = ParserState::READ_PAYLOAD;
     }
-    
+
     if (this->nextState == ParserState::READ_PAYLOAD)
     {
         if (buffer.size() < this->expectedLength)
@@ -53,7 +53,7 @@ bool Parser::parse(std::vector<char> &buffer, Message *out)
     return true;
 }
 
-std::vector<std::string> Parser::splitMessage(const std::string& payload)
+std::vector<std::string> Parser::splitMessage(const std::string &payload)
 {
     std::vector<std::string> result;
     std::string token;
@@ -65,10 +65,12 @@ std::vector<std::string> Parser::splitMessage(const std::string& payload)
     return result;
 }
 
-std::vector<std::vector<std::string>> Parser::splitGameStateMessage(const std::string &payload) {
+std::vector<std::vector<std::string>> Parser::splitGameStateMessage(const std::string &payload)
+{
     std::vector<std::vector<std::string>> result;
     const std::vector<std::string> playersStats = Parser::splitMessage(payload);
-    for (auto& playerString : playersStats) {
+    for (auto &playerString : playersStats)
+    {
         std::vector<std::string> playerStats;
         std::string token;
         std::stringstream ss(playerString);

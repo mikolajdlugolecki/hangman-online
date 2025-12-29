@@ -1,4 +1,5 @@
 #include "LoginWidget.h"
+
 #include "ui_LoginWidget.h"
 
 #include <QMessageBox>
@@ -13,7 +14,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent), ui(new Ui::LoginWid
 void LoginWidget::loginButtonHit()
 {
     QString nickname = ui->loginLineEdit->text();
-    if(nickname.size() < 3)
+    if (nickname.size() < 3)
     {
         QMessageBox::critical(this, "Error", "Nickname must be at least 3 characters long");
         return;

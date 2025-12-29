@@ -1,12 +1,13 @@
 #ifndef MENUWIDGET_H
 #define MENUWIDGET_H
 
-#include <QWidget>
 #include "GameState.h"
+
+#include <QWidget>
 
 namespace Ui
 {
-    class MenuWidget;
+class MenuWidget;
 }
 
 class MenuWidget : public QWidget
@@ -14,7 +15,7 @@ class MenuWidget : public QWidget
     Q_OBJECT
 public:
     explicit MenuWidget(QWidget *parent = nullptr);
-    void roomCreated(const QString& roomId, const QString& roomPin);
+    void roomCreated(const QString &roomId, const QString &roomPin);
     void roomError(const QString error);
 
 private:
@@ -25,7 +26,7 @@ private:
 
 signals:
     void createRoomRequested();
-    void joinRoomRequested(const QString& roomId, const QString& roomPin);
+    void joinRoomRequested(const QString &roomId, const QString &roomPin);
 };
 
 #endif // MENUWIDGET_H

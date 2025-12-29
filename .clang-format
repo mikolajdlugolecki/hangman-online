@@ -1,4 +1,3 @@
----
 Language: Cpp
 BasedOnStyle: Microsoft
 AccessModifierOffset: -4
@@ -28,9 +27,11 @@ BraceWrapping:
   BeforeElse: true
   IndentBraces: false
   SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
 
 AllowShortBlocksOnASingleLine: Never
-AllowShortFunctionsOnASingleLine: None
+AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AllowShortLambdasOnASingleLine: All
@@ -40,11 +41,14 @@ BinPackArguments: false
 BinPackParameters: false
 BreakBeforeBinaryOperators: None
 BreakBeforeTernaryOperators: true
-BreakConstructorInitializers: BeforeColon
-BreakInheritanceList: BeforeColon
 
-PointerAlignment: Left
-ReferenceAlignment: Left
+BreakConstructorInitializers: AfterColon
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 4
+BreakInheritanceList: AfterColon
+
+PointerAlignment: Right
+ReferenceAlignment: Right
 
 SpaceAfterCStyleCast: true
 SpaceBeforeAssignmentOperators: true
@@ -54,8 +58,8 @@ SpacesInAngles: Never
 SpacesInParens: Never
 
 IncludeBlocks: Regroup
-SortIncludes: CaseSensitive
+SortIncludes: CaseInsensitive
 
+Standard: Latest
 InsertNewlineAtEOF: true
-
 ...

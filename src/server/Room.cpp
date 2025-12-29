@@ -1,10 +1,10 @@
 #include "Room.h"
 
-#include <algorithm>
-#include <iostream>
-
 #include "Game.h"
 #include "Server.h"
+
+#include <algorithm>
+#include <iostream>
 
 Room::Room(Server *server, Client *owner)
 {
@@ -32,15 +32,15 @@ std::string Room::generatePin()
     return std::to_string(number);
 }
 
-void Room::broadcastMessage(const Response::Type type, const std::string& payload) const
+void Room::broadcastMessage(const Response::Type type, const std::string &payload) const
 {
-    for(const auto client : this->clients)
+    for (const auto client : this->clients)
     {
         this->server->sendMessage(client, type, payload);
     }
 }
 
-static std::string padLeft(const std::string& str, const size_t totalWidth, const char padChar = ' ')
+static std::string padLeft(const std::string &str, const size_t totalWidth, const char padChar = ' ')
 {
     if (str.length() >= totalWidth)
     {
@@ -49,7 +49,7 @@ static std::string padLeft(const std::string& str, const size_t totalWidth, cons
     return std::string(totalWidth - str.length(), padChar) + str;
 }
 
-static std::string padRight(const std::string& str, const size_t totalWidth, const char padChar = ' ')
+static std::string padRight(const std::string &str, const size_t totalWidth, const char padChar = ' ')
 {
     if (str.length() >= totalWidth)
     {
@@ -63,20 +63,21 @@ void Room::broadcastPlayersListLobby() const
     std::string message;
 
     size_t maxNicknameSize = 0;
-    for(const auto &client : clients)
+    for (const auto &client : clients)
     {
-        if(client->nickname.size()  > maxNicknameSize)
+        if (client->nickname.size() > maxNicknameSize)
         {
             maxNicknameSize = client->nickname.size();
         }
     }
 
     const size_t size = clients.size();
-    for(size_t i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
         const auto client = clients[i];
-        message += padRight(client->nickname, maxNicknameSize) + " (" + (client->isConnected ? "connected" : "disconnected") + ")";
-        if(i != size - 1)
+        message += padRight(client->nickname, maxNicknameSize) + " (" +
+                   (client->isConnected ? "connected" : "disconnected") + ")";
+        if (i != size - 1)
         {
             message += "|";
         }
@@ -91,21 +92,22 @@ void Room::broadcastPlayersListGame() const
     std::string message;
 
     size_t maxNicknameSize = 0;
-    for(const auto &client : clients)
+    for (const auto &client : clients)
     {
-        if(client->nickname.size() > maxNicknameSize)
+        if (client->nickname.size() > maxNicknameSize)
         {
             maxNicknameSize = client->nickname.size();
         }
     }
 
     const size_t size = clients.size();
-    for(size_t i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
         auto client = clients[i];
-        //TODO: implement sending game stats for each user
-        message += padRight(client->nickname, maxNicknameSize)  + " (" + (client->isConnected ? "connected" : "disconnected") + ")";
-        if(i != size - 1)
+        // TODO: implement sending game stats for each user
+        message += padRight(client->nickname, maxNicknameSize) + " (" +
+                   (client->isConnected ? "connected" : "disconnected") + ")";
+        if (i != size - 1)
         {
             message += "|";
         }
@@ -121,8 +123,9 @@ void Room::broadcastPlayersGameStats() const
     for (size_t i = 0; i < this->clients.size(); i++)
     {
         const auto client = clients[i];
-        payload += client->nickname + ":" + (client->isConnected ? "connected" : "disconnected") + ":" + "100" + ":" + std::to_string(client->errors) ;
-        if(i != this->clients.size() - 1)
+        payload += client->nickname + ":" + (client->isConnected ? "connected" : "disconnected") + ":" + "100" + ":" +
+                   std::to_string(client->errors);
+        if (i != this->clients.size() - 1)
         {
             payload += "|";
         }
@@ -138,7 +141,7 @@ void Room::join(Client *client)
     broadcastPlayersListLobby();
 }
 
-Client* Room::leave(const Client* client)
+Client *Room::leave(const Client *client)
 {
     const auto iterator = std::find(clients.begin(), clients.end(), client);
     if (iterator == clients.end())
@@ -160,7 +163,7 @@ Client* Room::leave(const Client* client)
         owner = clients.front();
     }
 
-    if(isGameStarted)
+    if (isGameStarted)
     {
         broadcastPlayersListGame();
     }
@@ -176,7 +179,7 @@ bool Room::isClientInRoom(const Client *client) const
 {
     for (auto &roomClient : this->clients)
     {
-        if(roomClient == client)
+        if (roomClient == client)
         {
             return true;
         }

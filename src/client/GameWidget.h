@@ -6,7 +6,7 @@
 
 namespace Ui
 {
-    class GameWidget;
+class GameWidget;
 }
 
 class GameWidget : public QWidget
@@ -20,15 +20,15 @@ public:
     void gameStatsReceived(std::vector<std::vector<std::string>> stats);
 
 private:
-    Ui::GameWidget* ui;
-    QTimer* timer = new QTimer(this);
+    Ui::GameWidget *ui;
+    QTimer *timer = new QTimer(this);
     int elapsedSeconds = 0;
     void guessButtonHit();
     QString transformWord(std::vector<char> word);
     void updateTime();
 
 signals:
-    void guessRequested(const QString& letter);
+    void guessRequested(const QString &letter);
 };
 
 #endif // GAMEWIDGET_H

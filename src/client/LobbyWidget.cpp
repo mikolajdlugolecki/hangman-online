@@ -1,4 +1,5 @@
 #include "LobbyWidget.h"
+
 #include "ui_LobbyWidget.h"
 
 #include <QMessageBox>
