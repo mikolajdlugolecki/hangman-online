@@ -3,57 +3,45 @@
 #include "Game.h"
 #include "Room.h"
 
-GameStats::GameStats(Room *room, std::string wordToGuess)
+GameStats::GameStats(Room *room, const std::string &wordToGuess)
 {
     this->room = room;
     this->fullWord = wordToGuess;
 
-    std::string wordWithHiddenChars = std::string(wordToGuess);
-    for (char &letter : wordWithHiddenChars)
+    auto wordWithHiddenCharacters = std::string(wordToGuess);
+    for (char &letter : wordWithHiddenCharacters)
     {
         if (letter != ' ')
         {
             letter = '_';
         }
     }
-    this->wordWithHiddenChars = wordWithHiddenChars;
+    this->wordWithHiddenChars = wordWithHiddenCharacters;
 }
 
-GameStats::~GameStats() {}
+GameStats::~GameStats() = default;
 
-void GameStats::uncoverLetters(char letter)
+void GameStats::uncoverLetters(const char letter)
 {
-    for (size_t i = 0; i < wordWithHiddenChars.size(); i++)
+    for (size_t i = 0; i < this->wordWithHiddenChars.size(); i++)
     {
-        if (fullWord[i] == letter)
+        if (this->fullWord[i] == letter)
         {
-            wordWithHiddenChars[i] = letter;
+            this->wordWithHiddenChars[i] = letter;
         }
     }
 }
 
-void GameStats::markLetterAsUsed(char letter)
+void GameStats::markLetterAsUsed(const char letter)
 {
-    usedLetters.push_back(letter);
+    this->usedLetters.push_back(letter);
 }
 
-bool GameStats::isLetterUsed(char letter)
+bool GameStats::isLetterUsed(const char letter) const
 {
-    for(char c : usedLetters)
+    for (const char c : this->usedLetters)
     {
-        if(c == letter)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool GameStats::isLetterCorrect(char letter)
-{
-    for(char c : fullWord)
-    {
-        if(c == letter)
+        if (c == letter)
         {
             return true;
         }
@@ -61,9 +49,21 @@ bool GameStats::isLetterCorrect(char letter)
     return false;
 }
 
-void GameStats::letterGuessed(std::string word, char letter)
+bool GameStats::isLetterCorrect(const char letter) const
 {
-    for (char guessedChar : guessedLetters)
+    for (const char c : this->fullWord)
+    {
+        if (c == letter)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void GameStats::letterGuessed(const std::string &word, const char letter)
+{
+    for (const char guessedChar : this->guessedLetters)
     {
         if (guessedChar == letter)
         {
@@ -71,17 +71,18 @@ void GameStats::letterGuessed(std::string word, char letter)
         }
     }
 
-    numberOfGuessedLettersInWord += Utils::countLettersInWord(word, letter);
-    guessedLetters.push_back(letter);
+    this->numberOfGuessedLettersInWord += Utils::countLettersInWord(word, letter);
+    this->guessedLetters.push_back(letter);
 
     uncoverLetters(letter);
 }
 
 void GameStats::recalculateScore()
 {
-    const int maxScore = 100;
-    const int errorValueMultiplier = 2;
+    constexpr int maxScore = 100;
+    constexpr int errorValueMultiplier = 2;
 
-    int value = 1.0f * numberOfGuessedLettersInWord / room->game->word.size() * maxScore - errorValueMultiplier * errors;
-    score = std::max(0, value);
+    const int value = 1.0f * this->numberOfGuessedLettersInWord / this->room->game->word.size() * maxScore -
+                      errorValueMultiplier * this->errors;
+    this->score = std::max(0, value);
 }

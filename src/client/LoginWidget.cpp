@@ -6,19 +6,19 @@
 
 LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent), ui(new Ui::LoginWidget)
 {
-    ui->setupUi(this);
-    connect(ui->loginBtn, &QPushButton::clicked, this, &LoginWidget::loginButtonHit);
-    connect(ui->loginLineEdit, &QLineEdit::returnPressed, ui->loginBtn, &QPushButton::click);
+    this->ui->setupUi(this);
+    connect(this->ui->loginBtn, &QPushButton::clicked, this, &LoginWidget::loginButtonHit);
+    connect(this->ui->loginLineEdit, &QLineEdit::returnPressed, this->ui->loginBtn, &QPushButton::click);
 }
 
 LoginWidget::~LoginWidget()
 {
-    delete ui;
+    delete this->ui;
 }
 
 void LoginWidget::loginButtonHit()
 {
-    QString nickname = ui->loginLineEdit->text();
+    const QString nickname = this->ui->loginLineEdit->text();
     if (nickname.size() < 3)
     {
         QMessageBox::critical(this, "Error", "Nickname must be at least 3 characters long");
@@ -26,10 +26,10 @@ void LoginWidget::loginButtonHit()
     }
 
     GameState::instance().usersNickname = nickname;
-    emit nicknameSent(nickname);
+    emit this->nicknameSent(nickname);
 }
 
-void LoginWidget::nicknameError(const QString error)
+void LoginWidget::nicknameError(const QString &error)
 {
     QMessageBox::critical(this, "Error", error);
 }

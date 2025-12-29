@@ -2,10 +2,8 @@
 #define SERVER_H
 
 #include "Client.h"
-#include "MessageType.h"
 #include "Parser.h"
 #include "Room.h"
-#include "Utils.h"
 
 #include <memory>
 #include <netinet/in.h>
@@ -15,7 +13,7 @@
 class Server
 {
 public:
-    Server(int port, std::atomic<bool>& running);
+    Server(int port, std::atomic<bool> &running);
     ~Server();
     void run();
     void sendBufferData(Client *client) const;
@@ -27,17 +25,17 @@ private:
     std::vector<std::unique_ptr<Client>> clients;
     std::vector<pollfd> pfds;
     std::vector<std::unique_ptr<Room>> rooms;
-    std::atomic<bool>& running;
+    std::atomic<bool> &running;
 
     void acceptNewClient();
     void handleClient(size_t client_index);
     void handleMessage(Client *client, const Message *message);
     bool validateNickname(Client *client, const std::string &nickname) const;
     void createNewRoom(Client *client);
-    void joinRoom(Client *client, const std::string &id, const std::string &pin);
+    void joinRoom(Client *client, const std::string &id, const std::string &pin) const;
     void leaveRoom(const Client *client);
     void startGame(const Client *roomOwner) const;
-    void timerThread();
+    void timerThread() const;
     void checkGuess(Client *client, const char &letter);
 };
 

@@ -15,9 +15,9 @@ class LoginWidget : public QWidget
     Q_OBJECT
 public:
     explicit LoginWidget(QWidget *parent = nullptr);
-    ~LoginWidget();
+    ~LoginWidget() override;
     void loginButtonHit();
-    void nicknameError(const QString error);
+    void nicknameError(const QString &error);
 
 private:
     Ui::LoginWidget *ui;

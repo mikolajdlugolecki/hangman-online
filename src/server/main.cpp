@@ -1,8 +1,8 @@
 #include "Server.h"
 
-#include <iostream>
 #include <atomic>
 #include <csignal>
+#include <iostream>
 
 std::atomic running(true);
 

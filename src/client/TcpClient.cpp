@@ -8,38 +8,38 @@
 
 TcpClient::TcpClient(QObject *parent) : QObject(parent)
 {
-    timer->setSingleShot(true);
-    connect(timer, &QTimer::timeout, this, &TcpClient::onTimeout);
-    connect(socket, &QTcpSocket::connected, this, &TcpClient::onConnected);
-    connect(socket, &QTcpSocket::disconnected, this, &TcpClient::onDisconnected);
-    connect(socket, &QTcpSocket::readyRead, this, &TcpClient::onReadyRead);
+    this->timer->setSingleShot(true);
+    connect(this->timer, &QTimer::timeout, this, &TcpClient::onTimeout);
+    connect(this->socket, &QTcpSocket::connected, this, &TcpClient::onConnected);
+    connect(this->socket, &QTcpSocket::disconnected, this, &TcpClient::onDisconnected);
+    connect(this->socket, &QTcpSocket::readyRead, this, &TcpClient::onReadyRead);
 }
 
 TcpClient::~TcpClient()
 {
-    delete parser;
+    delete this->parser;
 }
 
-void TcpClient::connectToServer(const QString &host, quint16 port)
+void TcpClient::connectToServer(const QString &host, const quint16 port) const
 {
-    timer->start(3000);
-    socket->connectToHost(host, port);
+    this->timer->start(3000);
+    this->socket->connectToHost(host, port);
 }
 
 void TcpClient::onConnected()
 {
-    timer->stop();
-    emit connected();
+    this->timer->stop();
+    emit this->connected();
 }
 
 void TcpClient::onTimeout()
 {
-    emit timeout();
+    emit this->timeout();
 }
 
 void TcpClient::onDisconnected()
 {
-    emit connectionLost();
+    emit this->connectionLost();
 }
 
 static QVector<QString> stdVectorToQVector(const std::vector<std::string> &stdStrings)
@@ -55,54 +55,54 @@ static QVector<QString> stdVectorToQVector(const std::vector<std::string> &stdSt
 
 void TcpClient::onReadyRead()
 {
-    QByteArray data = socket->readAll();
-    buffer.insert(buffer.end(), data.begin(), data.end());
-    Message *message = new Message();
+    QByteArray data = this->socket->readAll();
+    this->buffer.insert(this->buffer.end(), data.begin(), data.end());
+    auto *message = new Message();
 
-    while (this->parser->parse(buffer, message))
+    while (this->parser->parse(this->buffer, message))
     {
         switch (message->type)
         {
         case ServerMessageTypes::LOGIN_OK:
-            emit nicknameOK();
+            emit this->nicknameOK();
             break;
         case ServerMessageTypes::LOGIN_FAILED:
-            emit nicknameError(QString::fromStdString(message->payload));
+            emit this->nicknameError(QString::fromStdString(message->payload));
             break;
         case ServerMessageTypes::ROOM_CREATED:
         {
-            std::vector<std::string> result = parser->splitMessage(message->payload);
-            std::string roomId = result[0];
-            std::string roomPin = result[1];
-            emit roomCreated(QString::fromStdString(roomId), QString::fromStdString(roomPin));
+            std::vector<std::string> result = Parser::splitMessage(message->payload);
+            const std::string &roomId = result[0];
+            const std::string &roomPin = result[1];
+            emit this->roomCreated(QString::fromStdString(roomId), QString::fromStdString(roomPin));
         }
         break;
         case ServerMessageTypes::ROOM_OK:
-            emit roomOK();
+            emit this->roomOK();
             break;
         case ServerMessageTypes::ROOM_FAILED:
-            emit roomError(QString::fromStdString(message->payload));
+            emit this->roomError(QString::fromStdString(message->payload));
             break;
         case ServerMessageTypes::ROOM_OWNERSHIP_TRANSFER:
-            emit roomOwnershipTransfer();
+            emit this->roomOwnershipTransfer();
             break;
         case ServerMessageTypes::ROOM_USERS_LIST:
         {
-            std::vector<std::string> result = parser->splitMessage(message->payload);
-            emit updateLobbyPlayerList(stdVectorToQVector(result));
+            std::vector<std::string> result = Parser::splitMessage(message->payload);
+            emit this->updateLobbyPlayerList(stdVectorToQVector(result));
         }
         break;
         case ServerMessageTypes::GAME_STARTED:
         {
-            std::vector<std::string> result = parser->splitMessage(message->payload);
-            std::string wordLength = result[0];
-            std::string maxErrors = result[1];
-            std::string maxSeconds = result[2];
-            std::string coveredWord = result[3];
-            emit gameStarted(QString::fromStdString(wordLength),
-                             QString::fromStdString(maxErrors),
-                             QString::fromStdString(maxSeconds),
-                             QString::fromStdString(coveredWord));
+            std::vector<std::string> result = Parser::splitMessage(message->payload);
+            const std::string &wordLength = result[0];
+            const std::string &maxErrors = result[1];
+            const std::string &maxSeconds = result[2];
+            const std::string &coveredWord = result[3];
+            emit this->gameStarted(QString::fromStdString(wordLength),
+                                   QString::fromStdString(maxErrors),
+                                   QString::fromStdString(maxSeconds),
+                                   QString::fromStdString(coveredWord));
         }
         break;
         case ServerMessageTypes::PING:
@@ -110,59 +110,58 @@ void TcpClient::onReadyRead()
             break;
         case ServerMessageTypes::GUESS_OK:
         {
-            emit guessCorrect(QString::fromStdString(message->payload));
+            emit this->guessCorrect(QString::fromStdString(message->payload));
         }
         break;
         case ServerMessageTypes::GUESS_WRONG:
-            emit guessIncorrect();
+            emit this->guessIncorrect();
             break;
         case ServerMessageTypes::GAME_STATE:
-            //std::vector<std::vector<std::string>> stats = parser->splitGameStateMessage(message->payload);
-            std::vector<std::string> result = parser->splitMessage(message->payload);
-            emit gameState(result);
+            std::vector<std::string> result = Parser::splitMessage(message->payload);
+            emit this->gameState(result);
             break;
         }
     }
     delete message;
 }
 
-void TcpClient::sendMessage(ClientMessageTypes::Type type, const QString &payload)
+void TcpClient::sendMessage(ClientMessageTypes::Type type, const QString &payload) const
 {
-    Message *message = new Message();
+    auto *message = new Message();
     message->type = type;
     message->length = payload.length();
     message->payload = payload.toStdString();
-    auto buf = Serializer::serialize(*message);
-    socket->write(QByteArray::fromRawData(buf.data(), buf.size()));
+    const auto buf = Serializer::serialize(*message);
+    this->socket->write(QByteArray::fromRawData(buf.data(), static_cast<int>(buf.size())));
     delete message;
 }
 
-void TcpClient::nicknameReceived(const QString &nickname)
+void TcpClient::nicknameReceived(const QString &nickname) const
 {
-    sendMessage(ClientMessageTypes::LOGIN, nickname);
+    this->sendMessage(ClientMessageTypes::LOGIN, nickname);
 }
 
-void TcpClient::createRoomReceived()
+void TcpClient::createRoomReceived() const
 {
-    sendMessage(ClientMessageTypes::CREATE_ROOM, "");
+    this->sendMessage(ClientMessageTypes::CREATE_ROOM, "");
 }
 
-void TcpClient::joinRoomReceived(const QString &roomId, const QString &roomPin)
+void TcpClient::joinRoomReceived(const QString &roomId, const QString &roomPin) const
 {
-    sendMessage(ClientMessageTypes::JOIN_ROOM, roomId + "|" + roomPin);
+    this->sendMessage(ClientMessageTypes::JOIN_ROOM, roomId + "|" + roomPin);
 }
 
-void TcpClient::leaveRoomReceived()
+void TcpClient::leaveRoomReceived() const
 {
-    sendMessage(ClientMessageTypes::LEAVE_ROOM, "");
+    this->sendMessage(ClientMessageTypes::LEAVE_ROOM, "");
 }
 
-void TcpClient::startGameReceived()
+void TcpClient::startGameReceived() const
 {
-    sendMessage(ClientMessageTypes::START_GAME, "");
+    this->sendMessage(ClientMessageTypes::START_GAME, "");
 };
 
-void TcpClient::guessReceived(const QString &letter)
+void TcpClient::guessReceived(const QString &letter) const
 {
-    sendMessage(ClientMessageTypes::GUESS, letter);
+    this->sendMessage(ClientMessageTypes::GUESS, letter);
 };

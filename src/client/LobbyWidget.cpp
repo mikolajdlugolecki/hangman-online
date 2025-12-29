@@ -6,23 +6,23 @@
 
 LobbyWidget::LobbyWidget(QWidget *parent) : QWidget(parent), ui(new Ui::LobbyWidget)
 {
-    ui->setupUi(this);
-    connect(ui->leaveRoomButton, &QPushButton::clicked, this, &LobbyWidget::leaveRoomButtonHit);
-    connect(ui->startGameButton, &QPushButton::clicked, this, &LobbyWidget::startGameButtonHit);
+    this->ui->setupUi(this);
+    connect(this->ui->leaveRoomButton, &QPushButton::clicked, this, &LobbyWidget::leaveRoomButtonHit);
+    connect(this->ui->startGameButton, &QPushButton::clicked, this, &LobbyWidget::startGameButtonHit);
 }
 
 LobbyWidget::~LobbyWidget()
 {
-    delete ui;
+    delete this->ui;
 }
 
 void LobbyWidget::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
 
-    ui->roomIdLabel->setText(GameState::instance().roomId);
-    ui->roomPinLabel->setText(GameState::instance().roomPin);
-    ui->startGameButton->setVisible(GameState::instance().isRoomOwner);
+    this->ui->roomIdLabel->setText(GameState::instance().roomId);
+    this->ui->roomPinLabel->setText(GameState::instance().roomPin);
+    this->ui->startGameButton->setVisible(GameState::instance().isRoomOwner);
 
     updateLobbyPlayerList(GameState::instance().roomPlayers);
 }
@@ -30,27 +30,27 @@ void LobbyWidget::showEvent(QShowEvent *event)
 void LobbyWidget::lobbyOwnershipReceived()
 {
     GameState::instance().isRoomOwner = true;
-    ui->startGameButton->setVisible(true);
+    this->ui->startGameButton->setVisible(true);
     QMessageBox::information(this, "Info", "You are now a new owner of this room");
 }
 
-void LobbyWidget::updateLobbyPlayerList(QVector<QString> nicknames)
+void LobbyWidget::updateLobbyPlayerList(const QVector<QString> &nicknames)
 {
-    ui->listWidget->clear();
+    this->ui->listWidget->clear();
     GameState::instance().roomPlayers.clear();
 
     for (const QString &nick : nicknames)
     {
-        ui->listWidget->addItem(nick);
+        this->ui->listWidget->addItem(nick);
     }
 }
 
 void LobbyWidget::leaveRoomButtonHit()
 {
-    emit leaveRoomRequested();
+    emit this->leaveRoomRequested();
 }
 
 void LobbyWidget::startGameButtonHit()
 {
-    emit startGameRequested();
+    emit this->startGameRequested();
 }

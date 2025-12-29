@@ -6,38 +6,38 @@
 
 ConnectWidget::ConnectWidget(QWidget *parent) : QWidget(parent), ui(new Ui::ConnectWidget)
 {
-    ui->setupUi(this);
-    connect(ui->connectBtn, &QPushButton::clicked, this, &ConnectWidget::connectButtonHit);
-    connect(ui->hostLineEdit, &QLineEdit::returnPressed, ui->connectBtn, &QPushButton::click);
+    this->ui->setupUi(this);
+    connect(this->ui->connectBtn, &QPushButton::clicked, this, &ConnectWidget::connectButtonHit);
+    connect(this->ui->hostLineEdit, &QLineEdit::returnPressed, this->ui->connectBtn, &QPushButton::click);
 }
 
 ConnectWidget::~ConnectWidget()
 {
-    delete ui;
+    delete this->ui;
 }
 
 void ConnectWidget::connectButtonHit()
 {
-    ui->hostLineEdit->setEnabled(false);
-    ui->portSpinBox->setEnabled(false);
-    ui->connectBtn->setEnabled(false);
-    QString host = ui->hostLineEdit->text();
-    quint16 port = ui->portSpinBox->value();
-    emit connectionRequested(host, port);
+    this->ui->hostLineEdit->setEnabled(false);
+    this->ui->portSpinBox->setEnabled(false);
+    this->ui->connectBtn->setEnabled(false);
+    const QString host = this->ui->hostLineEdit->text();
+    const quint16 port = this->ui->portSpinBox->value();
+    emit this->connectionRequested(host, port);
 }
 
 void ConnectWidget::connectionTimedOut()
 {
     QMessageBox::critical(this, "Error", "Connection timed out");
-    ui->hostLineEdit->setEnabled(true);
-    ui->portSpinBox->setEnabled(true);
-    ui->connectBtn->setEnabled(true);
+    this->ui->hostLineEdit->setEnabled(true);
+    this->ui->portSpinBox->setEnabled(true);
+    this->ui->connectBtn->setEnabled(true);
 }
 
 void ConnectWidget::connectionLost()
 {
     QMessageBox::critical(this, "Error", "Connection lost");
-    ui->hostLineEdit->setEnabled(true);
-    ui->portSpinBox->setEnabled(true);
-    ui->connectBtn->setEnabled(true);
+    this->ui->hostLineEdit->setEnabled(true);
+    this->ui->portSpinBox->setEnabled(true);
+    this->ui->connectBtn->setEnabled(true);
 }

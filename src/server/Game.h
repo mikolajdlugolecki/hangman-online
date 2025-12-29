@@ -16,6 +16,7 @@ public:
 
     std::string word;
     std::string wordWithHiddenChars;
+
 private:
     static std::vector<std::string> availableWords;
 

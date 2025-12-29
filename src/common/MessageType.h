@@ -14,10 +14,9 @@ enum Type
     GUESS,       // letter
     PONG,        // *empty*
     RECONNECT,   // nick|room_id
-    ERROR,       // message
-    NUM_OF_REQUESTS
+    ERROR        // message
 };
-} // namespace Request
+}
 
 namespace ServerMessageTypes
 {
@@ -38,9 +37,8 @@ enum Type
     ROUND_FINISHED,          // result|points
     GAME_SUMMARY,            // player1:points|player2:...
     PING,                    // *empty*
-    REAUTH,                  // pin
-    NUM_OF_RESPONSES
+    REAUTH                   // pin
 };
-} // namespace Response
+}
 
 #endif

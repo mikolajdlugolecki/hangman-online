@@ -4,24 +4,22 @@
 #include "MessageType.h"
 #include "Parser.h"
 
-#include <QObject>
 #include <QTcpSocket>
 #include <QTimer>
-#include <QVector>
 
 class TcpClient : public QObject
 {
     Q_OBJECT
 public:
     explicit TcpClient(QObject *parent = nullptr);
-    ~TcpClient();
-    void connectToServer(const QString &host, quint16 port);
-    void nicknameReceived(const QString &nickname);
-    void createRoomReceived();
-    void joinRoomReceived(const QString &roomId, const QString &roomPin);
-    void leaveRoomReceived();
-    void startGameReceived();
-    void guessReceived(const QString &letter);
+    ~TcpClient() override;
+    void connectToServer(const QString &host, quint16 port) const;
+    void nicknameReceived(const QString &nickname) const;
+    void createRoomReceived() const;
+    void joinRoomReceived(const QString &roomId, const QString &roomPin) const;
+    void leaveRoomReceived() const;
+    void startGameReceived() const;
+    void guessReceived(const QString &letter) const;
 
 protected:
     QTcpSocket *socket = new QTcpSocket(this);
@@ -30,7 +28,7 @@ protected:
     void onTimeout();
     void onDisconnected();
     void onReadyRead();
-    void sendMessage(ClientMessageTypes::Type type, const QString &nickname);
+    void sendMessage(ClientMessageTypes::Type type, const QString &payload) const;
 
 private:
     Parser *parser = new Parser();
@@ -41,14 +39,14 @@ signals:
     void timeout();
     void connectionLost();
     void nicknameOK();
-    void nicknameError(const QString error);
-    void roomCreated(const QString roomId, const QString roomPin);
+    void nicknameError(QString error);
+    void roomCreated(QString roomId, QString roomPin);
     void roomOK();
-    void roomError(const QString error);
+    void roomError(QString error);
     void roomOwnershipTransfer();
-    void updateLobbyPlayerList(const QVector<QString> nicknames);
-    void gameStarted(const QString wordLength, const QString maxErrors, const QString maxSeconds, const QString coveredWord);
-    void gameState(const std::vector<std::string> stats);
+    void updateLobbyPlayerList(QVector<QString> nicknames);
+    void gameStarted(QString wordLength, QString maxErrors, QString maxSeconds, QString coveredWord);
+    void gameState(std::vector<std::string> stats);
     void guessCorrect(QString newWordWithHiddenChars);
     void guessIncorrect();
 };

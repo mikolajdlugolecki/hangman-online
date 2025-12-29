@@ -18,7 +18,7 @@ Client::~Client()
     delete message;
 }
 
-void Client::addMessageToBuffer(ServerMessageTypes::Type type, const std::string &payload)
+void Client::addMessageToBuffer(const ServerMessageTypes::Type type, const std::string &payload)
 {
     this->message->type = type;
     this->message->length = payload.size();
@@ -42,7 +42,7 @@ void Client::tick()
     {
         pingIntervalCounterSeconds = PING_INTERVAL_SECONDS;
         pongTimeoutCountersSeconds.push_back(PONG_TIMEOUT);
-        // server->write_debug_log(this, "Sending ping");
+        // Utils::writeDebugLog(this, "Sending ping");
         this->addMessageToBuffer(ServerMessageTypes::PING, "");
     }
 
@@ -85,5 +85,5 @@ void Client::pongReceived()
     {
         pongTimeoutCountersSeconds.erase(pongTimeoutCountersSeconds.begin());
     }
-    // writeDebugLog(client, "Pong received");
+    // Utils::writeDebugLog(this, "Pong received");
 }

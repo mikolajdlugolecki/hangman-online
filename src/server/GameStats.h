@@ -11,7 +11,7 @@ class Room;
 class GameStats
 {
 public:
-    GameStats(Room *room, std::string wordToGuess);
+    GameStats(Room *room, const std::string &wordToGuess);
     ~GameStats();
 
     Room *room;
@@ -26,11 +26,11 @@ public:
     std::string fullWord;
 
     void markLetterAsUsed(char letter);
-    bool isLetterUsed(char letter);
+    bool isLetterUsed(char letter) const;
 
-    bool isLetterCorrect(char letter);
+    bool isLetterCorrect(char letter) const;
 
-    void letterGuessed(std::string word, char c);
+    void letterGuessed(const std::string &word, char letter);
     void recalculateScore();
 
 private:

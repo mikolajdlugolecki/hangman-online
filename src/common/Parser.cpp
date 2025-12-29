@@ -64,21 +64,3 @@ std::vector<std::string> Parser::splitMessage(const std::string &payload)
     }
     return result;
 }
-
-std::vector<std::vector<std::string>> Parser::splitGameStateMessage(const std::string &payload)
-{
-    std::vector<std::vector<std::string>> result;
-    const std::vector<std::string> playersStats = Parser::splitMessage(payload);
-    for (auto &playerString : playersStats)
-    {
-        std::vector<std::string> playerStats;
-        std::string token;
-        std::stringstream ss(playerString);
-        while (std::getline(ss, token, ':'))
-        {
-            playerStats.push_back(token);
-        }
-        result.push_back(playerStats);
-    }
-    return result;
-}

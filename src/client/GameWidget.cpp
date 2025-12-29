@@ -5,46 +5,51 @@
 
 GameWidget::GameWidget(QWidget *parent) : QWidget(parent), ui(new Ui::GameWidget)
 {
-    ui->setupUi(this);
-    ui->guessLineEdit->focusWidget();
-    connect(ui->guessButton, &QPushButton::clicked, this, &GameWidget::guessButtonHit);
-    connect(ui->guessLineEdit, &QLineEdit::returnPressed, ui->guessButton, &QPushButton::click);
-    connect(timer, &QTimer::timeout, this, &GameWidget::updateTime);
+    this->ui->setupUi(this);
+    this->ui->guessLineEdit->focusWidget();
+    connect(this->ui->guessButton, &QPushButton::clicked, this, &GameWidget::guessButtonHit);
+    connect(this->ui->guessLineEdit, &QLineEdit::returnPressed, this->ui->guessButton, &QPushButton::click);
+    connect(this->timer, &QTimer::timeout, this, &GameWidget::updateTime);
 }
 
 GameWidget::~GameWidget()
 {
-    delete ui;
+    delete this->ui;
 }
 
-void GameWidget::init(const QString wordLength, const QString maxErrors, const QString maxSeconds, const QString coveredWord)
+void GameWidget::init(const QString &wordLength,
+                      const QString &maxErrors,
+                      const QString &maxSeconds,
+                      const QString &coveredWord)
 {
     GameState::instance().wordWithHiddenChars = coveredWord;
-    ui->maskedWordLabel->setText(transformWord(GameState::instance().wordWithHiddenChars));
+    this->ui->maskedWordLabel->setText(transformWord(GameState::instance().wordWithHiddenChars));
 
     GameState::instance().currentErrors = 0;
 
-    ui->wordLengthLabel->setText(wordLength);
+    this->ui->wordLengthLabel->setText(wordLength);
     QString errorsLabel =
         QString::fromStdString(std::to_string(GameState::instance().currentErrors)) + " / " + maxErrors;
-    ui->errorsLabel->setText(errorsLabel);
+    this->ui->errorsLabel->setText(errorsLabel);
 
-    elapsedSeconds = maxSeconds.toInt();
-    timer->start(1000);
-    updateTime();
+    this->elapsedSeconds = maxSeconds.toInt();
+    this->timer->start(1000);
+    this->updateTime();
 }
 
 void GameWidget::guessButtonHit()
 {
-    QString letter = ui->guessLineEdit->text();
+    const QString letter = this->ui->guessLineEdit->text();
     if (letter.length() < 1)
+    {
         return;
-    ui->guessLineEdit->clear();
+    }
+    this->ui->guessLineEdit->clear();
     GameState::instance().lastGuessedLetter = letter;
-    emit guessRequested(letter);
+    emit this->guessRequested(letter);
 };
 
-QString GameWidget::transformWord(QString word)
+QString GameWidget::transformWord(const QString &word)
 {
     QString result = "";
     for (auto &c : word)
@@ -55,34 +60,34 @@ QString GameWidget::transformWord(QString word)
     return result;
 }
 
-void GameWidget::guessCorrect(QString newWordWithHiddenChars)
+void GameWidget::guessCorrect(const QString &newWordWithHiddenChars)
 {
     GameState::instance().wordWithHiddenChars = newWordWithHiddenChars;
-    ui->maskedWordLabel->setText(transformWord(newWordWithHiddenChars));
+    this->ui->maskedWordLabel->setText(transformWord(newWordWithHiddenChars));
 }
 
 void GameWidget::guessIncorrect()
 {
     QString errorsLabel = QString::fromStdString(std::to_string(++GameState::instance().currentErrors)) + " / " +
                           GameState::instance().maxErrors;
-    ui->errorsLabel->setText(errorsLabel);
+    this->ui->errorsLabel->setText(errorsLabel);
 }
 
-void GameWidget::gameStatsReceived(std::vector<std::string> stats)
+void GameWidget::gameStatsReceived(const std::vector<std::string> &stats)
 {
-    ui->listWidget->clear();
-    for(auto &stat : stats)
+    this->ui->listWidget->clear();
+    for (auto &stat : stats)
     {
-        ui->listWidget->addItem(QString::fromStdString(stat));
+        this->ui->listWidget->addItem(QString::fromStdString(stat));
     }
 }
 
 void GameWidget::updateTime()
 {
-    int minutes = elapsedSeconds / 60;
-    int seconds = elapsedSeconds % 60;
+    const int minutes = elapsedSeconds / 60;
+    const int seconds = elapsedSeconds % 60;
 
-    ui->timeLabel->setText(QString("%1:%2").arg(minutes, 2, 10, QChar('0')).arg(seconds, 2, 10, QChar('0')));
+    this->ui->timeLabel->setText(QString("%1:%2").arg(minutes, 2, 10, QChar('0')).arg(seconds, 2, 10, QChar('0')));
 
-    elapsedSeconds--;
+    this->elapsedSeconds--;
 }

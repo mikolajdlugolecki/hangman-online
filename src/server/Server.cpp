@@ -15,7 +15,7 @@
 #include <thread>
 #include <unistd.h>
 
-void Server::timerThread()
+void Server::timerThread() const
 {
     while (true)
     {
@@ -28,7 +28,7 @@ void Server::timerThread()
     }
 }
 
-Server::Server(const int port, std::atomic<bool>& running) : running(running)
+Server::Server(const int port, std::atomic<bool> &running) : running(running)
 {
     this->socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (this->socket == -1)
@@ -67,7 +67,7 @@ Server::Server(const int port, std::atomic<bool>& running) : running(running)
 
     this->parser = new Parser();
 
-    std::thread timer([this]() { timerThread(); });
+    std::thread timer([this]() { this->timerThread(); });
     timer.detach();
 
     std::cout << "Server listening on port " << ntohs(this->address.sin_port) << "..." << std::endl << std::endl;
@@ -103,7 +103,7 @@ void Server::acceptNewClient()
     pfd.events = POLLIN | POLLOUT;
     this->clients.push_back(std::make_unique<Client>(clientSocket, clientAddress));
     this->pfds.push_back(pfd);
-    Utils::writeDebugLog(clients.back().get(), "New client accepted");
+    Utils::writeDebugLog(this->clients.back().get(), "New client accepted");
 }
 
 void Server::handleClient(const size_t client_index)
@@ -120,8 +120,8 @@ void Server::handleClient(const size_t client_index)
             close(client->socket);
             leaveRoom(client);
             Utils::writeDebugLog(client, "Client disconnected");
-            this->clients.erase(this->clients.begin() + client_index - 1);
-            this->pfds.erase(this->pfds.begin() + client_index);
+            this->clients.erase(this->clients.begin() + static_cast<int>(client_index) - 1);
+            this->pfds.erase(this->pfds.begin() + static_cast<int>(client_index));
             return;
         }
 
@@ -168,28 +168,28 @@ void Server::checkGuess(Client *client, const char &letter)
         return;
     }
 
-    auto stats = room->gameStats.at(client).get();
+    const auto stats = room->gameStats.at(client).get();
 
-	if(stats->errors >= room->game->maxErrors)
-	{
-		return;
-	}
+    if (stats->errors >= room->game->maxErrors)
+    {
+        return;
+    }
 
-	if(stats->isLetterUsed(letter))
-	{
-		return;
-	}
-	stats->markLetterAsUsed(letter);
+    if (stats->isLetterUsed(letter))
+    {
+        return;
+    }
+    stats->markLetterAsUsed(letter);
 
     if (stats->isLetterCorrect(letter))
     {
-		stats->letterGuessed(room->game->word, letter);
+        stats->letterGuessed(room->game->word, letter);
 
         client->addMessageToBuffer(ServerMessageTypes::GUESS_OK, stats->wordWithHiddenChars);
     }
     else
     {
-		stats->errors++;
+        stats->errors++;
         client->addMessageToBuffer(ServerMessageTypes::GUESS_WRONG, "");
     }
 
@@ -205,9 +205,9 @@ void Server::createNewRoom(Client *client)
     this->rooms.push_back(std::move(room));
 }
 
-void Server::joinRoom(Client *client, const std::string &id, const std::string &pin)
+void Server::joinRoom(Client *client, const std::string &id, const std::string &pin) const
 {
-    const auto room = Utils::findRoom(rooms, id);
+    const auto room = Utils::findRoom(this->rooms, id);
 
     if (room == nullptr)
     {
@@ -288,10 +288,10 @@ void Server::handleMessage(Client *client, const Message *message)
     }
     break;
     case ClientMessageTypes::GUESS:
-	{
-		char letter = std::toupper((message->payload)[0]);
+    {
+        const char letter = static_cast<char>(std::toupper((message->payload)[0]));
         checkGuess(client, letter);
-	}    
+    }
     default:
         break;
     }
@@ -315,7 +315,7 @@ void Server::run()
     while (this->running.load())
     {
         poll(this->pfds.data(), this->pfds.size(), -1);
-        if (pfds[0].revents & POLLIN)
+        if (this->pfds[0].revents & POLLIN)
         {
             this->acceptNewClient();
         }
@@ -330,14 +330,22 @@ void Server::sendBufferData(Client *client) const
 {
     const size_t minSize = std::min(static_cast<size_t>(MSG_SIZE), client->sendingBuffer.size());
     const auto buffer = new char[minSize];
+
     for (size_t i = 0; i < minSize; i++)
     {
         buffer[i] = client->sendingBuffer[i];
     }
-    const size_t bytesSent = write(client->socket, buffer, minSize);
-    for (size_t i = 0; i < bytesSent; i++)
+
+    const ssize_t bytesSent = write(client->socket, buffer, minSize);
+    delete[] buffer;
+
+    if (bytesSent == -1)
+    {
+        return;
+    }
+
+    for (ssize_t i = 0; i < bytesSent; i++)
     {
         client->sendingBuffer.pop_front();
     }
-    delete[] buffer;
 }

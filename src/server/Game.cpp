@@ -13,8 +13,9 @@ std::string Game::getGameStartedPayload() const
 
 static void stringToUpper(std::string &str)
 {
-    for (char &c : str) {
-        c = std::toupper((unsigned char)c);
+    for (char &c : str)
+    {
+        c = std::toupper(static_cast<unsigned char>(c));
     }
 }
 
@@ -45,19 +46,19 @@ Game::Game(const unsigned short int maxErrors, const unsigned short int maxSecon
 {
     static std::random_device rd;
     static std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, Game::availableWords.size() - 1);
+    std::uniform_int_distribution<> dis(0, static_cast<int>(Game::availableWords.size()) - 1);
 
     this->word = Game::availableWords[dis(gen)];
 
-    std::string wordWithHiddenChars = std::string(this->word);
-    for (char &letter : wordWithHiddenChars)
+    auto wordWithHiddenCharacters = std::string(this->word);
+    for (char &letter : wordWithHiddenCharacters)
     {
         if (letter != ' ')
         {
             letter = '_';
         }
     }
-    this->wordWithHiddenChars = wordWithHiddenChars;
+    this->wordWithHiddenChars = wordWithHiddenCharacters;
 
     this->wordLength = this->word.length();
     this->maxErrors = maxErrors;

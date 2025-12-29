@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QVector>
-#include <QWidget>
 
 class GameState : public QObject
 {

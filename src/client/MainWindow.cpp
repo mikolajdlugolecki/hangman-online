@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(client,
             &TcpClient::roomCreated,
             this,
-            [this](const QString roomId, const QString roomPin)
+            [this](const QString &roomId, const QString &roomPin)
             {
                 GameState::instance().roomId = roomId;
                 GameState::instance().roomPin = roomPin;
@@ -84,7 +84,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(client,
             &TcpClient::gameStarted,
             this,
-            [this](const QString wordLength, const QString maxErrors)
+            [this](const QString &wordLength, const QString &maxErrors)
             {
                 stack->setCurrentWidget(GameScene);
                 GameState::instance().wordLength = wordLength;

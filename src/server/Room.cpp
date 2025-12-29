@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <random>
 
 Room::Room(Server *server, Client *owner)
 {
@@ -41,7 +42,7 @@ void Room::broadcastMessage(const ServerMessageTypes::Type type, const std::stri
     }
 }
 
-// static std::string padLeft(const std::string &str, const size_t totalWidth, const char padChar = ' ')
+// static std::string padLeft(const std::string &str, const size_t totalWidth, char padChar = ' ')
 // {
 //     if (str.length() >= totalWidth)
 //     {
@@ -50,7 +51,7 @@ void Room::broadcastMessage(const ServerMessageTypes::Type type, const std::stri
 //     return std::string(totalWidth - str.length(), padChar) + str;
 // }
 
-static std::string padRight(const std::string &str, const size_t totalWidth, const char padChar = ' ')
+static std::string padRight(const std::string &str, const size_t totalWidth, char padChar = ' ')
 {
     if (str.length() >= totalWidth)
     {
@@ -64,7 +65,7 @@ void Room::broadcastPlayersListLobby() const
     std::string message;
 
     size_t maxNicknameSize = 0;
-    for (const auto &client : clients)
+    for (const auto &client : this->clients)
     {
         if (client->nickname.size() > maxNicknameSize)
         {
@@ -72,10 +73,10 @@ void Room::broadcastPlayersListLobby() const
         }
     }
 
-    const size_t size = clients.size();
+    const size_t size = this->clients.size();
     for (size_t i = 0; i < size; i++)
     {
-        const auto client = clients[i];
+        const auto client = this->clients[i];
         message += padRight(client->nickname, maxNicknameSize) + " (" +
                    (client->isConnected ? "connected" : "disconnected") + ")";
         if (i != size - 1)
@@ -93,7 +94,7 @@ void Room::broadcastPlayersListGame() const
     std::string message;
 
     size_t maxNicknameSize = 0;
-    for (const auto &client : clients)
+    for (const auto &client : this->clients)
     {
         if (client->nickname.size() > maxNicknameSize)
         {
@@ -101,11 +102,10 @@ void Room::broadcastPlayersListGame() const
         }
     }
 
-    const size_t size = clients.size();
+    const size_t size = this->clients.size();
     for (size_t i = 0; i < size; i++)
     {
-        auto client = clients[i];
-        // TODO: implement sending game stats for each user
+        const auto client = this->clients[i];
         message += padRight(client->nickname, maxNicknameSize) + " (" +
                    (client->isConnected ? "connected" : "disconnected") + ")";
         if (i != size - 1)
@@ -123,7 +123,7 @@ void Room::broadcastPlayersGameStats() const
     std::string payload;
 
     size_t maxNicknameSize = 8;
-    for (const auto &client : clients)
+    for (const auto &client : this->clients)
     {
         if (client->nickname.size() > maxNicknameSize)
         {
@@ -131,30 +131,27 @@ void Room::broadcastPlayersGameStats() const
         }
     }
 
-    payload += padRight("Nick", maxNicknameSize) + 
-    padRight("Score", 8) +
-    padRight("Errors", 8) +
-    "Connection|";
+    payload += padRight("Nick", maxNicknameSize) + padRight("Score", 8) + padRight("Errors", 8) + "Connection|";
 
     for (size_t i = 0; i < this->clients.size(); i++)
     {
-        const auto client = clients[i];
+        const auto client = this->clients[i];
 
-        auto connectionState = (client->isConnected ? "connected" : "disconnected");
+        const auto connectionState = (client->isConnected ? "connected" : "disconnected");
 
-        std::shared_ptr<GameStats> stats = gameStats.at(client);
+        std::shared_ptr<GameStats> stats = this->gameStats.at(client);
 
         payload += padRight(client->nickname, maxNicknameSize) +
-        padRight(std::to_string(stats.get()->score) + "/100", 8) +
-        padRight(std::to_string(stats.get()->errors) + "/" + std::to_string(game->maxErrors), 8) + 
-        connectionState;
+                   padRight(std::to_string(stats.get()->score) + "/100", 8) +
+                   padRight(std::to_string(stats.get()->errors) + "/" + std::to_string(this->game->maxErrors), 8) +
+                   connectionState;
 
         if (i != this->clients.size() - 1)
         {
             payload += "|";
         }
     }
-    
+
     std::cout << "Broadcasting game stats for room ID = " << this->id << " list = " << payload << std::endl;
     this->broadcastMessage(ServerMessageTypes::GAME_STATE, payload);
 }
@@ -168,16 +165,16 @@ void Room::join(Client *client)
 
 Client *Room::leave(const Client *client)
 {
-    const auto iterator = std::find(clients.begin(), clients.end(), client);
-    if (iterator == clients.end())
+    const auto iterator = std::find(this->clients.begin(), this->clients.end(), client);
+    if (iterator == this->clients.end())
     {
         return nullptr;
     }
 
-    const bool wasOwner = (client == owner);
-    clients.erase(iterator);
+    const bool wasOwner = (client == this->owner);
+    this->clients.erase(iterator);
 
-    if (clients.empty())
+    if (this->clients.empty())
     {
         // TODO: close room, remove from server's list
         return nullptr;
@@ -185,10 +182,10 @@ Client *Room::leave(const Client *client)
 
     if (wasOwner)
     {
-        owner = clients.front();
+        this->owner = this->clients.front();
     }
 
-    if (isGameStarted)
+    if (this->isGameStarted)
     {
         broadcastPlayersListGame();
     }
@@ -197,7 +194,7 @@ Client *Room::leave(const Client *client)
         broadcastPlayersListLobby();
     }
 
-    return wasOwner ? owner : nullptr;
+    return wasOwner ? this->owner : nullptr;
 }
 
 bool Room::isClientInRoom(const Client *client) const
@@ -215,12 +212,12 @@ bool Room::isClientInRoom(const Client *client) const
 void Room::startGame()
 {
     this->game = std::make_unique<Game>(10, 60);
-    isGameStarted = true;
+    this->isGameStarted = true;
 
-    gameStats.clear();
+    this->gameStats.clear();
     for (auto client : this->clients)
     {
-        gameStats[client] = std::make_shared<GameStats>(this, game->word);
+        this->gameStats[client] = std::make_shared<GameStats>(this, this->game->word);
     }
 
     broadcastMessage(ServerMessageTypes::GAME_STARTED, this->game->getGameStartedPayload());

@@ -1,15 +1,17 @@
 #include "Utils.h"
 
-#include "Room.h"
 #include "Client.h"
+#include "Room.h"
 #include "Serializer.h"
+
+#include <iostream>
 
 namespace Utils
 {
-int countLettersInWord(std::string word, char letter)
+int countLettersInWord(const std::string &word, const char letter)
 {
     int count = 0;
-    for (char c : word)
+    for (const char c : word)
     {
         if (c == letter)
         {
@@ -46,4 +48,4 @@ void writeMessageAsHex(const Message *message)
     std::cout << std::endl;
 }
 
-} // namespace Utils
+}

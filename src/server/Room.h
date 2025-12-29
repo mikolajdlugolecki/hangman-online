@@ -2,14 +2,12 @@
 #define ROOM_H
 
 #include "Client.h"
-#include "MessageType.h"
-#include "Parser.h"
 #include "GameStats.h"
+#include "MessageType.h"
 
-#include <random>
-#include <vector>
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
+#include <vector>
 
 class Game;
 class Server;
@@ -21,7 +19,7 @@ public:
     std::string pin;
     std::unique_ptr<Game> game;
     bool isGameStarted = false;
-    std::unordered_map<Client*, std::shared_ptr<GameStats>> gameStats;
+    std::unordered_map<Client *, std::shared_ptr<GameStats>> gameStats;
 
     Room(Server *server, Client *owner);
     ~Room();

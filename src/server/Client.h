@@ -6,9 +6,9 @@
 #include "MessageType.h"
 
 #include <deque>
+#include <mutex>
 #include <netinet/in.h>
 #include <vector>
-#include <mutex>
 
 class Room;
 class Server;

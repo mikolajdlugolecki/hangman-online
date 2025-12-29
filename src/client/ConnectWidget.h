@@ -14,8 +14,8 @@ class ConnectWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ConnectWidget(QWidget *parent = 0);
-    ~ConnectWidget();
+    explicit ConnectWidget(QWidget *parent = nullptr);
+    ~ConnectWidget() override;
     void connectionTimedOut();
     void connectionLost();
 
