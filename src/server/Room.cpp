@@ -162,7 +162,6 @@ void Room::broadcastPlayersGameStats() const
 void Room::join(Client *client)
 {
     this->clients.push_back(client);
-    gameStats[client] = std::make_shared<GameStats>(this, game->word);
     client->room = this;
     broadcastPlayersListLobby();
 }
