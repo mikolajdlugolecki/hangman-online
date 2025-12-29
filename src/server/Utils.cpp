@@ -2,6 +2,7 @@
 
 #include "Room.h"
 #include "Client.h"
+#include "Serializer.h"
 
 namespace Utils
 {
@@ -33,6 +34,16 @@ Room *findRoom(const std::vector<std::unique_ptr<Room>> &rooms, const std::strin
 void writeDebugLog(const Client *client, const std::string &message)
 {
     std::cout << client->addressToString() << " --- " << message << std::endl;
+}
+
+void writeMessageAsHex(const Message *message)
+{
+    const auto buf = Serializer::serialize(*message);
+    for (const unsigned char c : buf)
+    {
+        std::cout << std::hex << static_cast<int>(c) << " ";
+    }
+    std::cout << std::endl;
 }
 
 } // namespace Utils

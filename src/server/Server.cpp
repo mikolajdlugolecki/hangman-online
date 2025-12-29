@@ -131,11 +131,8 @@ void Server::handleClient(const size_t client_index)
                 Utils::writeDebugLog(client,
                                      "Message received. type = " + std::to_string(client->message->type) + " Payload " +
                                          client->message->payload);
+                // Utils::writeMessageAsHex(client->message);
             }
-            // auto buf = Serializer::serialize(*client->message);
-            // for (unsigned char c : buf)
-            // 	std::cout << std::hex << (int)c << " ";
-            // std::cout << std::endl;
             this->handleMessage(client, client->message);
         }
     }

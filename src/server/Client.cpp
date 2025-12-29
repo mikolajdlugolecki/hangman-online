@@ -23,10 +23,7 @@ void Client::addMessageToBuffer(ServerMessageTypes::Type type, const std::string
     this->message->type = type;
     this->message->length = payload.size();
     this->message->payload = payload;
-    // auto buf = Serializer::serialize(*client->message);
-    // for (unsigned char c : buf)
-    // 	std::cout << std::hex << (int)c << " ";
-    // std::cout << std::endl;
+    // Utils::writeMessageAsHex(this->message);
     auto buf = Serializer::serialize(*this->message);
     this->sendingBuffer.insert(this->sendingBuffer.begin(), buf.begin(), buf.end());
 }
