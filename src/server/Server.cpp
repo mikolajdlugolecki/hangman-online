@@ -97,7 +97,7 @@ void Server::acceptNewClient()
     pfd.events = POLLIN;
     this->clients.push_back(std::make_unique<Client>(clientSocket, clientAddress));
     this->pfds.push_back(pfd);
-    writeDebugLog(clients.back().get(), "New client accepted");
+    Utils::writeDebugLog(clients.back().get(), "New client accepted");
 }
 
 void Server::handleClient(const size_t client_index)
@@ -113,7 +113,7 @@ void Server::handleClient(const size_t client_index)
         {
             close(client->socket);
             leaveRoom(client);
-            writeDebugLog(client, "Client disconnected");
+            Utils::writeDebugLog(client, "Client disconnected");
             this->clients.erase(this->clients.begin() + client_index - 1);
             this->pfds.erase(this->pfds.begin() + client_index);
             return;
@@ -123,7 +123,7 @@ void Server::handleClient(const size_t client_index)
         {
 			if(client->message->type != ClientMessageTypes::PONG)
 			{
-				writeDebugLog(client,
+				Utils::writeDebugLog(client,
 					"Message received. type = " + std::to_string(client->message->type) + " Payload " +
 					client->message->payload);
 			}
@@ -136,30 +136,13 @@ void Server::handleClient(const size_t client_index)
     }
 }
 
-void Server::writeDebugLog(const Client *client, const std::string &message)
-{
-    std::cout << client->addressToString() << " --- " << message << std::endl;
-}
-
-Room *Server::findRoom(const std::string &id) const
-{
-    for (auto &room : this->rooms)
-    {
-        if (room->id == id)
-        {
-            return room.get();
-        }
-    }
-    return nullptr;
-}
-
 void Server::startGame(const Client *roomOwner) const
 {
     auto *room = roomOwner->room;
 
     if (room == nullptr)
     {
-        writeDebugLog(roomOwner, "Could not find the client's room");
+        Utils::writeDebugLog(roomOwner, "Could not find the client's room");
         return;
     }
 
@@ -172,7 +155,7 @@ void Server::checkGuess(Client *client, const std::string &letter)
 
     if (room == nullptr)
     {
-        writeDebugLog(client, "Could not find the client's room");
+        Utils::writeDebugLog(client, "Could not find the client's room");
         return;
     }
 
@@ -206,25 +189,25 @@ void Server::createNewRoom(Client *client)
 {
     auto room = std::make_unique<Room>(this, client);
     this->sendMessage(client, ServerMessageTypes::ROOM_CREATED, room->id + "|" + room->pin);
-    writeDebugLog(client, "Room created ID = " + room->id + " PIN = " + room->pin);
+    Utils::writeDebugLog(client, "Room created ID = " + room->id + " PIN = " + room->pin);
     this->rooms.push_back(std::move(room));
 }
 
 void Server::joinRoom(Client *client, const std::string &id, const std::string &pin)
 {
-    const auto room = findRoom(id);
+    const auto room = Utils::findRoom(rooms, id);
 
     if (room == nullptr)
     {
         this->sendMessage(client, ServerMessageTypes::ROOM_FAILED, "Room not found. Wrong room id.");
-        writeDebugLog(client, "Room not found ID = " + id);
+        Utils::writeDebugLog(client, "Room not found ID = " + id);
         return;
     }
 
     if (pin != room->pin)
     {
         this->sendMessage(client, ServerMessageTypes::ROOM_FAILED, "Wrong pin!");
-        writeDebugLog(client, "Wrong room pin ID = " + room->id);
+        Utils::writeDebugLog(client, "Wrong room pin ID = " + room->id);
         return;
     }
 
@@ -233,7 +216,7 @@ void Server::joinRoom(Client *client, const std::string &id, const std::string &
     this->sendMessage(client, ServerMessageTypes::ROOM_OK, "");
     room->broadcastPlayersListLobby();
 
-    writeDebugLog(client, "Joined room ID = " + room->id);
+    Utils::writeDebugLog(client, "Joined room ID = " + room->id);
 }
 
 void Server::leaveRoom(const Client *client)
@@ -242,16 +225,16 @@ void Server::leaveRoom(const Client *client)
 
     if (room == nullptr)
     {
-        writeDebugLog(client, "Could not find the client's room");
+        Utils::writeDebugLog(client, "Could not find the client's room");
         return;
     }
 
     const auto *newOwner = room->leave(client);
-    writeDebugLog(client, "Client left room ID = " + room->id);
+    Utils::writeDebugLog(client, "Client left room ID = " + room->id);
 
     if (newOwner != nullptr)
     {
-        writeDebugLog(newOwner, "New owner of room ID = " + room->id);
+        Utils::writeDebugLog(newOwner, "New owner of room ID = " + room->id);
         this->sendMessage(newOwner, ServerMessageTypes::ROOM_OWNERSHIP_TRANSFER, "");
     }
 }

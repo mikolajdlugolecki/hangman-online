@@ -5,6 +5,7 @@
 #include "MessageType.h"
 #include "Parser.h"
 #include "Room.h"
+#include "Utils.h"
 
 #include <memory>
 #include <netinet/in.h>
@@ -18,7 +19,6 @@ public:
     ~Server();
     void run();
     void sendMessage(const Client *client, ServerMessageTypes::Type type, const std::string &payload);
-    static void writeDebugLog(const Client *client, const std::string &message);
 
 private:
     int socket{};
@@ -35,7 +35,6 @@ private:
     void createNewRoom(Client *client);
     void joinRoom(Client *client, const std::string &id, const std::string &pin);
     void leaveRoom(const Client *client);
-    Room *findRoom(const std::string &id) const;
     void startGame(const Client *roomOwner) const;
     void timerThread();
     void checkGuess(Client *client, const std::string &letter);
