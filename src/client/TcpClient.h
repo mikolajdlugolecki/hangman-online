@@ -47,7 +47,7 @@ signals:
     void roomOwnershipTransfer();
     void updateLobbyPlayerList(const QVector<QString> nicknames);
     void gameStarted(const QString wordLength, const QString maxErrors, const QString maxSeconds);
-    void gameState(const std::vector<std::vector<std::string>> stats);
+    void gameState(const std::vector<std::string> stats);
     void guessPositions(std::vector<std::string> result);
     void guessIncorrect();
 };

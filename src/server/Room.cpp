@@ -120,17 +120,39 @@ void Room::broadcastPlayersListGame() const
 void Room::broadcastPlayersGameStats() const
 {
     std::string payload;
+
+    size_t maxNicknameSize = 8;
+    for (const auto &client : clients)
+    {
+        if (client->nickname.size() > maxNicknameSize)
+        {
+            maxNicknameSize = client->nickname.size();
+        }
+    }
+
+    payload += padRight("Nick", maxNicknameSize) + 
+    padRight("Score", 8) +
+    padRight("Errors", 8) +
+    "Connection|";
+
     for (size_t i = 0; i < this->clients.size(); i++)
     {
         const auto client = clients[i];
-        payload += client->nickname + ":" + (client->isConnected ? "connected" : "disconnected") + ":" + "100" + ":" +
-                   std::to_string(client->errors);
+
+        auto connectionState = (client->isConnected ? "connected" : "disconnected");
+
+        payload += padRight(client->nickname, maxNicknameSize) +
+        padRight("15/100", 8) +
+        padRight("2/7", 8) + 
+        connectionState;
+
         if (i != this->clients.size() - 1)
         {
             payload += "|";
         }
     }
-    //
+    
+    std::cout << "Broadcasting game stats for room ID = " << this->id << " list = " << payload << std::endl;
     this->broadcastMessage(Response::GAME_STATE, payload);
 }
 
@@ -196,4 +218,6 @@ void Room::startGame()
     {
         client->errors = 0;
     }
+
+    broadcastPlayersGameStats();
 }

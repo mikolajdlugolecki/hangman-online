@@ -111,8 +111,9 @@ void TcpClient::onReadyRead()
             emit guessIncorrect();
             break;
         case Response::GAME_STATE:
-            std::vector<std::vector<std::string>> stats = parser->splitGameStateMessage(message->payload);
-            emit gameState(stats);
+            //std::vector<std::vector<std::string>> stats = parser->splitGameStateMessage(message->payload);
+            std::vector<std::string> result = parser->splitMessage(message->payload);
+            emit gameState(result);
             break;
         }
     }

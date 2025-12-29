@@ -200,6 +200,8 @@ void Server::checkGuess(Client *client, const std::string &letter)
         }
         this->sendMessage(client, Response::GUESS_WRONG, "");
     }
+
+	room->broadcastPlayersGameStats();
     // terminate called after throwing an instance of 'std::length_error'
     // what():  vector::_M_range_insert
     // room->broadcastPlayersGameStats();

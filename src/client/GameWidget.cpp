@@ -7,7 +7,6 @@ GameWidget::GameWidget(QWidget *parent) : QWidget(parent), ui(new Ui::GameWidget
 {
     ui->setupUi(this);
     ui->guessLineEdit->focusWidget();
-    ui->statsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     connect(ui->guessButton, &QPushButton::clicked, this, &GameWidget::guessButtonHit);
     connect(ui->guessLineEdit, &QLineEdit::returnPressed, ui->guessButton, &QPushButton::click);
     connect(timer, &QTimer::timeout, this, &GameWidget::updateTime);
@@ -69,18 +68,12 @@ void GameWidget::guessIncorrect()
     ui->errorsLabel->setText(errorsLabel);
 }
 
-void GameWidget::gameStatsReceived(std::vector<std::vector<std::string>> stats)
+void GameWidget::gameStatsReceived(std::vector<std::string> stats)
 {
-    for (std::vector<std::string> dataRow : stats)
+    for(auto &stat : stats)
     {
-        int row = ui->statsTable->rowCount();
-        ui->statsTable->insertRow(row);
-        for (size_t i = 0; i < dataRow.size(); i++)
-        {
-            ui->statsTable->setItem(row, i, new QTableWidgetItem(QString::fromStdString(dataRow[i])));
-        }
+        ui->listWidget->addItem(QString::fromStdString(stat));
     }
-    ui->statsTable->resizeColumnsToContents();
 }
 
 void GameWidget::updateTime()

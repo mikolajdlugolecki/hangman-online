@@ -22,7 +22,7 @@ public:
     void init(const QString wordLength, const QString maxErrors, const QString maxSeconds);
     void guessPositions(std::vector<std::string> positions);
     void guessIncorrect();
-    void gameStatsReceived(std::vector<std::vector<std::string>> stats);
+    void gameStatsReceived(std::vector<std::string> stats);
 
 private:
     Ui::GameWidget *ui;
