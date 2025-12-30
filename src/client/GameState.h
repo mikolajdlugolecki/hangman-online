@@ -24,6 +24,8 @@ public:
     QString maxErrors;
     QString wordWithHiddenChars;
     QString lastGuessedLetter;
+    int remainingTime;
+    bool inProgress;
 
 private:
     GameState();

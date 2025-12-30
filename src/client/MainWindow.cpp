@@ -97,6 +97,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(client, &TcpClient::guessCorrect, GameScene, &GameWidget::guessCorrect);
     connect(client, &TcpClient::guessIncorrect, GameScene, &GameWidget::guessIncorrect);
     connect(client, &TcpClient::gameState, GameScene, &GameWidget::gameStatsReceived);
+    connect(client, &TcpClient::gameRemainingTime, GameScene, &GameWidget::gameRemainingTimeReceived);
+    connect(client, &TcpClient::roundOver, GameScene, &GameWidget::roundOverReceived);
+    connect(GameScene,
+            &GameWidget::leaveGame,
+            this,
+            [this]()
+            {
+                GameState::instance().inProgress = false;
+
+                stack->setCurrentWidget(LobbyScene);
+            });
 }
 
 MainWindow::~MainWindow()

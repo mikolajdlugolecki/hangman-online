@@ -24,10 +24,12 @@ private:
     void showEvent(QShowEvent *event) override;
     void leaveRoomButtonHit();
     void startGameButtonHit();
+    void listChanged();
 
 signals:
     void leaveRoomRequested();
     void startGameRequested();
+    void listUpdated();
 };
 
 #endif // LOBBYWIDGET_H

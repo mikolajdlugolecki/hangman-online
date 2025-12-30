@@ -8,7 +8,28 @@
 std::string Game::getGameStartedPayload() const
 {
     return std::to_string(this->wordLength) + "|" + std::to_string(this->maxErrors) + "|" +
-           std::to_string(this->maxSeconds) + "|" + wordWithHiddenChars;
+           std::to_string(static_cast<int>(this->duration.count())) + "|" + wordWithHiddenChars;
+}
+
+void Game::start()
+{
+    this->startTime = std::chrono::steady_clock::now();
+}
+
+void Game::update()
+{
+    if (auto now = std::chrono::steady_clock::now(); now - this->startTime >= this->duration)
+    {
+        this->stop();
+    }
+}
+
+std::chrono::seconds Game::getRemainingTime() const
+{
+    const auto now = std::chrono::steady_clock::now();
+    const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - this->startTime);
+    const auto remaining = duration - elapsed;
+    return std::max(remaining, std::chrono::seconds(0));
 }
 
 static void stringToUpper(std::string &str)
@@ -42,7 +63,12 @@ std::vector<std::string> Game::loadWords(const std::string &fileName)
     return result;
 }
 
-Game::Game(const unsigned short int maxErrors, const unsigned short int maxSeconds)
+void Game::stop()
+{
+    this->inProgress = false;
+}
+
+Game::Game(const unsigned short int maxErrors, const unsigned int duration)
 {
     static std::random_device rd;
     static std::mt19937 gen(rd());
@@ -62,7 +88,8 @@ Game::Game(const unsigned short int maxErrors, const unsigned short int maxSecon
 
     this->wordLength = this->word.length();
     this->maxErrors = maxErrors;
-    this->maxSeconds = maxSeconds;
+    this->duration = std::chrono::seconds(duration);
+    this->inProgress = true;
 }
 
 std::vector<std::string> Game::availableWords = Game::loadWords(WORDS_FILE);

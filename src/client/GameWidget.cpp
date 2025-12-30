@@ -3,6 +3,8 @@
 #include "GameState.h"
 #include "ui_GameWidget.h"
 
+#include <QMessageBox>
+
 GameWidget::GameWidget(QWidget *parent) : QWidget(parent), ui(new Ui::GameWidget)
 {
     this->ui->setupUi(this);
@@ -22,7 +24,11 @@ void GameWidget::init(const QString &wordLength,
                       const QString &maxSeconds,
                       const QString &coveredWord)
 {
+    ui->guessButton->setEnabled(true);
+    ui->guessLineEdit->setEnabled(true);
+
     GameState::instance().wordWithHiddenChars = coveredWord;
+    GameState::instance().inProgress = true;
     this->ui->maskedWordLabel->setText(transformWord(GameState::instance().wordWithHiddenChars));
 
     GameState::instance().currentErrors = 0;
@@ -32,7 +38,7 @@ void GameWidget::init(const QString &wordLength,
         QString::fromStdString(std::to_string(GameState::instance().currentErrors)) + " / " + maxErrors;
     this->ui->errorsLabel->setText(errorsLabel);
 
-    this->elapsedSeconds = maxSeconds.toInt();
+    GameState::instance().remainingTime = maxSeconds.toInt();
     this->timer->start(1000);
     this->updateTime();
 }
@@ -82,12 +88,47 @@ void GameWidget::gameStatsReceived(const std::vector<std::string> &stats)
     }
 }
 
+void GameWidget::gameRemainingTimeReceived(const QString &seconds)
+{
+    GameState::instance().remainingTime = seconds.toInt();
+    this->updateTime();
+}
+
+void GameWidget::roundOverReceived(int type, const std::vector<std::string> &payload)
+{
+    ui->guessButton->setEnabled(false);
+    ui->guessLineEdit->setEnabled(false);
+    switch (type)
+    {
+    case 1:
+        QMessageBox::information(this,
+                                 "Congratulations!",
+                                 "Your results:\n\nPoints: " + QString::fromStdString(payload[0]) +
+                                     "\nErrors: " + QString::fromStdString(payload[1]));
+        break;
+    case 2:
+        QMessageBox::information(this,
+                                 "Everyone's done",
+                                 "Final result:\n\n" + QString::fromStdString(payload[0]) +
+                                     QString::fromStdString(payload[1]) +
+                                     (payload.size() == 3 ? QString::fromStdString(payload[2]) : ""));
+        emit leaveGame();
+        break;
+    case 3:
+        QMessageBox::critical(this,
+                              "Time's up!",
+                              "Final result:\n\n" + QString::fromStdString(payload[0]) +
+                                  QString::fromStdString(payload[1]) +
+                                  (payload.size() == 3 ? QString::fromStdString(payload[2]) : ""));
+        emit leaveGame();
+        break;
+    }
+}
+
 void GameWidget::updateTime()
 {
-    const int minutes = elapsedSeconds / 60;
-    const int seconds = elapsedSeconds % 60;
+    const int minutes = GameState::instance().remainingTime / 60;
+    const int seconds = GameState::instance().remainingTime % 60;
 
     this->ui->timeLabel->setText(QString("%1:%2").arg(minutes, 2, 10, QChar('0')).arg(seconds, 2, 10, QChar('0')));
-
-    this->elapsedSeconds--;
 }

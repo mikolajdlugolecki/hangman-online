@@ -1,5 +1,6 @@
 #include "Client.h"
 
+#include "Game.h"
 #include "Room.h"
 #include "Serializer.h"
 #include "Server.h"
@@ -23,8 +24,10 @@ void Client::addMessageToBuffer(const ServerMessageTypes::Type type, const std::
     this->message->type = type;
     this->message->length = payload.size();
     this->message->payload = payload;
+    Utils::writeDebugLog(this, this->message->payload);
     // Utils::writeMessageAsHex(this->message);
     auto buf = Serializer::serialize(*this->message);
+    std::lock_guard<std::mutex> lock(this->sendingBufferMutex);
     this->sendingBuffer.insert(this->sendingBuffer.begin(), buf.begin(), buf.end());
 }
 
@@ -61,7 +64,7 @@ void Client::tick()
     {
         isConnected = receivedPong;
 
-        if (room->isGameStarted == false)
+        if (room->game && room->game->inProgress == false)
         {
             room->broadcastPlayersListLobby();
         }

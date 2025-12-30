@@ -26,17 +26,19 @@ public:
     void guessCorrect(const QString &newWordWithHiddenChars);
     void guessIncorrect();
     void gameStatsReceived(const std::vector<std::string> &stats);
+    void gameRemainingTimeReceived(const QString &seconds);
+    void roundOverReceived(int type, const std::vector<std::string> &payload);
 
 private:
     Ui::GameWidget *ui;
     QTimer *timer = new QTimer(this);
-    int elapsedSeconds = 0;
     void guessButtonHit();
     QString transformWord(const QString &word);
     void updateTime();
 
 signals:
     void guessRequested(const QString &letter);
+    void leaveGame();
 };
 
 #endif // GAMEWIDGET_H

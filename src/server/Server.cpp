@@ -160,7 +160,7 @@ void Server::startGame(const Client *roomOwner) const
 
 void Server::checkGuess(Client *client, const char &letter)
 {
-    const auto *room = client->room;
+    auto *room = client->room;
 
     if (room == nullptr)
     {
@@ -186,11 +186,19 @@ void Server::checkGuess(Client *client, const char &letter)
         stats->letterGuessed(room->game->word, letter);
 
         client->addMessageToBuffer(ServerMessageTypes::GUESS_OK, stats->wordWithHiddenChars);
+
+        if (stats->fullWordGuessed)
+        {
+            client->inGame = false;
+            if (!room->allClientsFinished())
+            {
+                client->addMessageToBuffer(ServerMessageTypes::ROUND_SINGLE_FINISHED, room->getStats(client));
+            }
+        }
     }
     else
     {
         stats->errors++;
-        client->addMessageToBuffer(ServerMessageTypes::GUESS_WRONG, "");
     }
 
     stats->recalculateScore();
@@ -247,7 +255,10 @@ void Server::leaveRoom(const Client *client)
     if (newOwner != nullptr)
     {
         Utils::writeDebugLog(newOwner, "New owner of room ID = " + room->id);
-        newOwner->addMessageToBuffer(ServerMessageTypes::ROOM_OWNERSHIP_TRANSFER, "");
+        if (!newOwner->inGame)
+        {
+            newOwner->addMessageToBuffer(ServerMessageTypes::ROOM_OWNERSHIP_TRANSFER, "");
+        }
     }
 }
 
@@ -314,7 +325,7 @@ void Server::run()
 {
     while (this->running.load())
     {
-        poll(this->pfds.data(), this->pfds.size(), -1);
+        poll(this->pfds.data(), this->pfds.size(), 100);
         if (this->pfds[0].revents & POLLIN)
         {
             this->acceptNewClient();
@@ -323,6 +334,13 @@ void Server::run()
         {
             this->handleClient(i);
         }
+        for (const auto &room : this->rooms)
+        {
+            if (room->game && room->game->inProgress)
+            {
+                room->updateGame();
+            }
+        }
     }
 }
 
@@ -330,6 +348,8 @@ void Server::sendBufferData(Client *client) const
 {
     const size_t minSize = std::min(static_cast<size_t>(MSG_SIZE), client->sendingBuffer.size());
     const auto buffer = new char[minSize];
+
+    std::lock_guard<std::mutex> lock(client->sendingBufferMutex);
 
     for (size_t i = 0; i < minSize; i++)
     {

@@ -19,6 +19,7 @@ public:
     int errors = 0;
     int score = 0;
     int numberOfGuessedLettersInWord = 0;
+    bool fullWordGuessed = false;
     std::vector<char> guessedLetters;
     std::vector<char> usedLetters;
 

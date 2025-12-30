@@ -74,6 +74,11 @@ void GameStats::letterGuessed(const std::string &word, const char letter)
     this->numberOfGuessedLettersInWord += Utils::countLettersInWord(word, letter);
     this->guessedLetters.push_back(letter);
 
+    if (this->numberOfGuessedLettersInWord == static_cast<int>(word.length()))
+    {
+        this->fullWordGuessed = true;
+    }
+
     uncoverLetters(letter);
 }
 

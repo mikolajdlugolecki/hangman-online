@@ -34,10 +34,62 @@ std::string Room::generatePin()
     return std::to_string(number);
 }
 
+std::string Room::getGameResult()
+{
+    std::string result;
+
+    std::vector<std::pair<Client *, std::shared_ptr<GameStats>>> vec(this->gameStats.begin(), this->gameStats.end());
+
+    std::sort(vec.begin(),
+              vec.end(),
+              [](const auto &a, const auto &b)
+              {
+                  if (a.second.get()->score != b.second.get()->score)
+                  {
+                      return a.second.get()->score > b.second.get()->score;
+                  }
+                  return a.second.get()->errors < b.second.get()->errors;
+              });
+
+    size_t limit;
+
+    if (vec.size() == 2)
+    {
+        limit = 2;
+    }
+    else
+    {
+        limit = 3;
+    }
+
+    for (size_t i = 0; i < limit; i++)
+    {
+        const auto &[client, stats] = vec[i];
+        // TODO: if client left during game, there is a heap user after free warning
+        result += std::to_string(i + 1) + ". " + client->nickname + " - " + std::to_string(stats.get()->score) +
+                  " points - " + std::to_string(stats.get()->errors) + " errors\n";
+        if (static_cast<int>(i) != std::min(2, static_cast<int>(vec.size()) - 1))
+        {
+            result += "|";
+        }
+    }
+
+    return result;
+}
+
 void Room::broadcastMessage(const ServerMessageTypes::Type type, const std::string &payload) const
 {
     for (const auto client : this->clients)
     {
+        client->addMessageToBuffer(type, payload);
+    }
+}
+
+void Room::broadcastMessageWithMutex(ServerMessageTypes::Type type, const std::string &payload) const
+{
+    for (const auto client : this->clients)
+    {
+        std::lock_guard<std::mutex> lock(client->pingPongMutex);
         client->addMessageToBuffer(type, payload);
     }
 }
@@ -137,7 +189,7 @@ void Room::broadcastPlayersGameStats() const
     {
         const auto client = this->clients[i];
 
-        const auto connectionState = (client->isConnected ? "connected" : "disconnected");
+        const auto connectionState = (client->isConnected ? client->inGame ? "in game" : "finished" : "disconnected");
 
         std::shared_ptr<GameStats> stats = this->gameStats.at(client);
 
@@ -185,7 +237,7 @@ Client *Room::leave(const Client *client)
         this->owner = this->clients.front();
     }
 
-    if (this->isGameStarted)
+    if (this->game && this->game->inProgress)
     {
         broadcastPlayersListGame();
     }
@@ -212,15 +264,63 @@ bool Room::isClientInRoom(const Client *client) const
 void Room::startGame()
 {
     this->game = std::make_unique<Game>(10, 60);
-    this->isGameStarted = true;
 
     this->gameStats.clear();
     for (auto client : this->clients)
     {
+        client->inGame = true;
         this->gameStats[client] = std::make_shared<GameStats>(this, this->game->word);
     }
+
+    this->game->start();
 
     broadcastMessage(ServerMessageTypes::GAME_STARTED, this->game->getGameStartedPayload());
 
     broadcastPlayersGameStats();
+
+    this->lastUpdate = std::chrono::steady_clock::now();
+}
+
+void Room::updateGame()
+{
+    const auto now = std::chrono::steady_clock::now();
+
+    if (now - this->lastUpdate < std::chrono::seconds(1))
+    {
+        return;
+    }
+    this->game->update();
+
+    broadcastMessage(ServerMessageTypes::REMAINING_TIME,
+                     std::to_string(static_cast<int>(this->game->getRemainingTime().count())));
+
+    if (!this->game->inProgress)
+    {
+        broadcastMessage(ServerMessageTypes::ROUND_TIMEOUT, this->getGameResult());
+    }
+
+    if (this->allClientsFinished())
+    {
+        broadcastMessage(ServerMessageTypes::ROUND_ALL_FINISHED, this->getGameResult());
+        this->game->stop();
+    }
+
+    this->lastUpdate = now;
+}
+
+bool Room::allClientsFinished() const
+{
+    for (const auto client : this->clients)
+    {
+        if (client->inGame)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+std::string Room::getStats(Client *client)
+{
+    return std::to_string(this->gameStats[client]->score) + "|" + std::to_string(this->gameStats[client]->errors);
 }

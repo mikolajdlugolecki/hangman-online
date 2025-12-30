@@ -113,8 +113,19 @@ void TcpClient::onReadyRead()
             emit this->guessCorrect(QString::fromStdString(message->payload));
         }
         break;
-        case ServerMessageTypes::GUESS_WRONG:
-            emit this->guessIncorrect();
+        case ServerMessageTypes::REMAINING_TIME:
+            // emit this->guessIncorrect();
+            emit this->gameRemainingTime(QString::fromStdString(message->payload));
+            break;
+        case ServerMessageTypes::ROUND_SINGLE_FINISHED:
+
+            emit this->roundOver(1, Parser::splitMessage(message->payload));
+            break;
+        case ServerMessageTypes::ROUND_ALL_FINISHED:
+            emit this->roundOver(2, Parser::splitMessage(message->payload));
+            break;
+        case ServerMessageTypes::ROUND_TIMEOUT:
+            emit this->roundOver(3, Parser::splitMessage(message->payload));
             break;
         case ServerMessageTypes::GAME_STATE:
             std::vector<std::string> result = Parser::splitMessage(message->payload);

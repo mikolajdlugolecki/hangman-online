@@ -49,6 +49,8 @@ signals:
     void gameState(std::vector<std::string> stats);
     void guessCorrect(QString newWordWithHiddenChars);
     void guessIncorrect();
+    void gameRemainingTime(QString seconds);
+    void roundOver(int type, std::vector<std::string> payload);
 };
 
 #endif // TCPCLIENT_H

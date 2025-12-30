@@ -7,8 +7,10 @@
 LobbyWidget::LobbyWidget(QWidget *parent) : QWidget(parent), ui(new Ui::LobbyWidget)
 {
     this->ui->setupUi(this);
+    this->ui->startGameButton->setEnabled(false);
     connect(this->ui->leaveRoomButton, &QPushButton::clicked, this, &LobbyWidget::leaveRoomButtonHit);
     connect(this->ui->startGameButton, &QPushButton::clicked, this, &LobbyWidget::startGameButtonHit);
+    connect(this, &LobbyWidget::listUpdated, this, &LobbyWidget::listChanged);
 }
 
 LobbyWidget::~LobbyWidget()
@@ -42,7 +44,22 @@ void LobbyWidget::updateLobbyPlayerList(const QVector<QString> &nicknames)
     for (const QString &nick : nicknames)
     {
         this->ui->listWidget->addItem(nick);
+        GameState::instance().roomPlayers.append(nick);
     }
+
+    emit listUpdated();
+}
+
+void LobbyWidget::listChanged()
+{
+    if (GameState::instance().roomPlayers.length() < 2)
+    {
+        this->ui->startGameButton->setEnabled(false);
+        this->ui->startGameButton->setToolTip("Minimum 2 players are required to start a game");
+        return;
+    }
+    this->ui->startGameButton->setEnabled(true);
+    this->ui->startGameButton->setToolTip("");
 }
 
 void LobbyWidget::leaveRoomButtonHit()
