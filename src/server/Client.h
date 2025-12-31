@@ -21,7 +21,6 @@ public:
     Message *message;
     std::vector<char> receivingBuffer;
     std::deque<char> sendingBuffer;
-    std::mutex sendingBufferMutex;
 
     std::string nickname;
     Room *room = nullptr;
@@ -31,7 +30,6 @@ public:
     bool receivedPong = false;
     int pingIntervalCounterSeconds = PING_INTERVAL_SECONDS;
     std::vector<int> pongTimeoutCountersSeconds;
-    std::mutex pingPongMutex;
 
     Client(int inSocket, sockaddr_in inAddress);
     ~Client();

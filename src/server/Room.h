@@ -24,7 +24,6 @@ public:
     Room(Server *server, Client *owner);
     ~Room();
     void broadcastMessage(ServerMessageTypes::Type type, const std::string &payload) const;
-    void broadcastMessageWithMutex(ServerMessageTypes::Type type, const std::string &payload) const;
     void broadcastPlayersListLobby() const;
     void broadcastPlayersListGame() const;
     void broadcastPlayersGameStats() const;

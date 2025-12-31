@@ -15,21 +15,28 @@
 #include <thread>
 #include <unistd.h>
 
+int timerPipeFds[2];
+
 void Server::timerThread() const
 {
     while (true)
     {
         sleep(1);
 
-        for (const auto &client : this->clients)
-        {
-            client->tick();
-        }
+		char c = 'W';
+    	write(timerPipeFds[1], &c, 1);
     }
 }
 
 Server::Server(const int port, std::atomic<bool> &running) : running(running)
 {
+	if(pipe(timerPipeFds) == -1)
+	{
+		perror("pipe");
+        exit(1);
+	}
+	fcntl(timerPipeFds[0], F_SETFL, O_NONBLOCK);
+
     this->socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (this->socket == -1)
     {
@@ -64,6 +71,11 @@ Server::Server(const int port, std::atomic<bool> &running) : running(running)
     pfd.fd = this->socket;
     pfd.events = POLLIN;
     this->pfds.push_back(pfd);
+
+	pollfd pfdTimer{};
+	pfdTimer.fd = timerPipeFds[0];
+	pfdTimer.events = POLLIN;
+	this->pfds.push_back(pfdTimer);
 
     this->parser = new Parser();
 
@@ -111,7 +123,7 @@ void Server::handleClient(const size_t client_index)
     if (this->pfds[client_index].revents & POLLIN)
     {
         char buffer[MSG_SIZE]{};
-        Client *client = this->clients[client_index - 1].get();
+        Client *client = this->clients[client_index - 2].get();
         const size_t bytes = read(client->socket, buffer, MSG_SIZE);
         client->receivingBuffer.insert(client->receivingBuffer.end(), buffer, buffer + bytes);
 
@@ -120,7 +132,7 @@ void Server::handleClient(const size_t client_index)
             close(client->socket);
             leaveRoom(client);
             Utils::writeDebugLog(client, "Client disconnected");
-            this->clients.erase(this->clients.begin() + static_cast<int>(client_index) - 1);
+            this->clients.erase(this->clients.begin() + static_cast<int>(client_index) - 2);
             this->pfds.erase(this->pfds.begin() + static_cast<int>(client_index));
             return;
         }
@@ -140,7 +152,7 @@ void Server::handleClient(const size_t client_index)
 
     if (this->pfds[client_index].revents & POLLOUT)
     {
-        Client *client = this->clients[client_index - 1].get();
+        Client *client = this->clients[client_index - 2].get();
         this->sendBufferData(client);
     }
 }
@@ -321,26 +333,44 @@ bool Server::validateNickname(Client *client, const std::string &nickname) const
     return true;
 }
 
+void Server::secondElapsed()
+{
+	for (const auto &room : this->rooms)
+	{
+		if (room->game && room->game->inProgress)
+		{
+			room->updateGame();
+		}
+	}
+
+	for (const auto &client : this->clients)
+	{
+		client->tick();
+	}
+}
+
 void Server::run()
 {
     while (this->running.load())
     {
-        poll(this->pfds.data(), this->pfds.size(), 100);
+        poll(this->pfds.data(), this->pfds.size(), -1);
         if (this->pfds[0].revents & POLLIN)
         {
             this->acceptNewClient();
         }
-        for (size_t i = 1; i < this->clients.size() + 1; i++)
+		if(this->pfds[1].revents & POLLIN)
+		{
+			char temp[64];
+		    while (read(timerPipeFds[0], temp, sizeof(temp)) > 0)
+			{ }
+
+			secondElapsed();
+		}
+        for (size_t i = 2; i < this->pfds.size(); i++)
         {
             this->handleClient(i);
         }
-        for (const auto &room : this->rooms)
-        {
-            if (room->game && room->game->inProgress)
-            {
-                room->updateGame();
-            }
-        }
+        
     }
 }
 
@@ -348,8 +378,6 @@ void Server::sendBufferData(Client *client) const
 {
     const size_t minSize = std::min(static_cast<size_t>(MSG_SIZE), client->sendingBuffer.size());
     const auto buffer = new char[minSize];
-
-    std::lock_guard<std::mutex> lock(client->sendingBufferMutex);
 
     for (size_t i = 0; i < minSize; i++)
     {

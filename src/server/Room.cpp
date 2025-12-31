@@ -85,15 +85,6 @@ void Room::broadcastMessage(const ServerMessageTypes::Type type, const std::stri
     }
 }
 
-void Room::broadcastMessageWithMutex(ServerMessageTypes::Type type, const std::string &payload) const
-{
-    for (const auto client : this->clients)
-    {
-        std::lock_guard<std::mutex> lock(client->pingPongMutex);
-        client->addMessageToBuffer(type, payload);
-    }
-}
-
 // static std::string padLeft(const std::string &str, const size_t totalWidth, char padChar = ' ')
 // {
 //     if (str.length() >= totalWidth)

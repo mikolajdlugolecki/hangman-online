@@ -27,7 +27,6 @@ void Client::addMessageToBuffer(const ServerMessageTypes::Type type, const std::
     Utils::writeDebugLog(this, this->message->payload);
     // Utils::writeMessageAsHex(this->message);
     auto buf = Serializer::serialize(*this->message);
-    std::lock_guard<std::mutex> lock(this->sendingBufferMutex);
     this->sendingBuffer.insert(this->sendingBuffer.begin(), buf.begin(), buf.end());
 }
 
@@ -38,8 +37,6 @@ std::string Client::addressToString() const
 
 void Client::tick()
 {
-    std::lock_guard<std::mutex> lock(pingPongMutex);
-
     pingIntervalCounterSeconds--;
     if (pingIntervalCounterSeconds <= 0)
     {
@@ -77,8 +74,6 @@ void Client::tick()
 
 void Client::pongReceived()
 {
-    std::lock_guard<std::mutex> lock(pingPongMutex);
-
     receivedPong = true;
     if (isConnected == false)
     {

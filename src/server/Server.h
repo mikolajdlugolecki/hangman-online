@@ -27,6 +27,8 @@ private:
     std::vector<std::unique_ptr<Room>> rooms;
     std::atomic<bool> &running;
 
+    void secondElapsed();
+
     void acceptNewClient();
     void handleClient(size_t client_index);
     void handleMessage(Client *client, const Message *message);
