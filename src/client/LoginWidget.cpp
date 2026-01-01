@@ -1,5 +1,6 @@
 #include "LoginWidget.h"
 
+#include "NonBlockingMessagebox.h"
 #include "ui_LoginWidget.h"
 
 #include <QMessageBox>
@@ -21,7 +22,9 @@ void LoginWidget::loginButtonHit()
     const QString nickname = this->ui->loginLineEdit->text();
     if (nickname.size() < 3)
     {
-        QMessageBox::critical(this, "Error", "Nickname must be at least 3 characters long");
+        auto *box = new NonBlockingMessageBox(
+            this, "Error", "Nickname must be at least 3 characters long", QMessageBox::Warning);
+        box->showWithTimeout();
         return;
     }
 
@@ -31,5 +34,6 @@ void LoginWidget::loginButtonHit()
 
 void LoginWidget::nicknameError(const QString &error)
 {
-    QMessageBox::critical(this, "Error", error);
+    auto *box = new NonBlockingMessageBox(this, "Error", error, QMessageBox::Critical);
+    box->showWithTimeout();
 }

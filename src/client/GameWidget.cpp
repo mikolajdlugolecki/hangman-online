@@ -1,6 +1,7 @@
 #include "GameWidget.h"
 
 #include "GameState.h"
+#include "NonBlockingMessagebox.h"
 #include "ui_GameWidget.h"
 
 #include <QMessageBox>
@@ -75,7 +76,7 @@ void GameWidget::guessCorrect(const QString &newWordWithHiddenChars, const QStri
     GameState::instance().wordWithHiddenChars = newWordWithHiddenChars;
     GameState::instance().currentScore = currentScore.toInt();
 
-    this->ui->maskedWordLabel->setText(transformWord(newWordWithHiddenChars));    
+    this->ui->maskedWordLabel->setText(transformWord(newWordWithHiddenChars));
     this->ui->scoreLabel->setText(currentScore + " / 100");
 }
 
@@ -112,30 +113,49 @@ void GameWidget::roundOverReceived(int type, const std::vector<std::string> &pay
     switch (type)
     {
     case 1:
-        QMessageBox::information(this,
-                                 "Congratulations!",
-                                 "Your results:\n\nPoints: " + QString::fromStdString(payload[0]) +
-                                     "\nErrors: " + QString::fromStdString(payload[1]));
-        break;
+    {
+        auto *box = new NonBlockingMessageBox(
+            this,
+            "Info",
+            "Congratulations!\n\nYour results:\n\nPoints: " + QString::fromStdString(payload[0]) +
+                "\nErrors: " + QString::fromStdString(payload[1]));
+        box->showWithTimeout();
+    }
+    break;
     case 2:
-        QMessageBox::critical(this, "Info", "Maximum errors reached\n\nYour results:\n\nPoints: " + QString::fromStdString(payload[0]) + "\nErrors: " + QString::fromStdString(payload[1]));
-        break;
+    {
+        auto *box = new NonBlockingMessageBox(
+            this,
+            "Info",
+            "Maximum errors reached\n\nYour results:\n\nPoints: " + QString::fromStdString(payload[0]) +
+                "\nErrors: " + QString::fromStdString(payload[1]));
+        box->showWithTimeout();
+    }
+    break;
     case 3:
-        QMessageBox::information(this,
-                                 "Everyone's done",
-                                 "Final result:\n\n" + QString::fromStdString(payload[0]) +
-                                     QString::fromStdString(payload[1]) +
-                                     (payload.size() == 3 ? QString::fromStdString(payload[2]) : ""));
-        emit leaveGame();
-        break;
+    {
+        auto *box = new NonBlockingMessageBox(
+            this,
+            "Info",
+            "All players already finished\n\nFinal result:\n\n" + QString::fromStdString(payload[0]) +
+                QString::fromStdString(payload[1]) + (payload.size() == 3 ? QString::fromStdString(payload[2]) : ""));
+        box->showWithTimeout();
+        connect(box, &QMessageBox::buttonClicked, this, [this]() { emit this->leaveGame(); });
+        connect(box, &NonBlockingMessageBox::timedOut, this, [this]() { emit this->leaveGame(); });
+    }
+    break;
     case 4:
-        QMessageBox::critical(this,
-                              "Time's up!",
-                              "Final result:\n\n" + QString::fromStdString(payload[0]) +
-                                  QString::fromStdString(payload[1]) +
-                                  (payload.size() == 3 ? QString::fromStdString(payload[2]) : ""));
-        emit leaveGame();
-        break;
+    {
+        auto *box = new NonBlockingMessageBox(this,
+                                              "Info",
+                                              "Time's up!\n\nFinal result:\n\n" + QString::fromStdString(payload[0]) +
+                                                  QString::fromStdString(payload[1]) +
+                                                  (payload.size() == 3 ? QString::fromStdString(payload[2]) : ""));
+        box->showWithTimeout();
+        connect(box, &QMessageBox::buttonClicked, this, [this]() { emit this->leaveGame(); });
+        connect(box, &NonBlockingMessageBox::timedOut, this, [this]() { emit this->leaveGame(); });
+    }
+    break;
     }
 }
 

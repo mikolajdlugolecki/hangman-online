@@ -197,7 +197,8 @@ void Server::checkGuess(Client *client, const char &letter)
     {
         stats->letterGuessed(room->game->word, letter);
         stats->recalculateScore();
-        client->addMessageToBuffer(ServerMessageTypes::GUESS_OK, stats->wordWithHiddenChars + "|" + std::to_string(stats->score));
+        client->addMessageToBuffer(ServerMessageTypes::GUESS_OK,
+                                   stats->wordWithHiddenChars + "|" + std::to_string(stats->score));
     }
     else
     {
@@ -205,7 +206,8 @@ void Server::checkGuess(Client *client, const char &letter)
         stats->recalculateScore();
         client->addMessageToBuffer(ServerMessageTypes::GUESS_WRONG, std::to_string(stats->score));
 
-        if (stats->errors == room->game->maxErrors) {
+        if (stats->errors == room->game->maxErrors)
+        {
             client->inGame = false;
             client->addMessageToBuffer(ServerMessageTypes::ROUND_SINGLE_OVER, room->getStats(client));
         }

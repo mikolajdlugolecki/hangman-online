@@ -1,5 +1,6 @@
 #include "MenuWidget.h"
 
+#include "NonBlockingMessagebox.h"
 #include "ui_MenuWidget.h"
 
 #include <QMessageBox>
@@ -22,11 +23,6 @@ MenuWidget::~MenuWidget()
 void MenuWidget::createRoomButtonHit()
 {
     emit this->createRoomRequested();
-}
-
-void MenuWidget::roomCreated(const QString &roomId, const QString &roomPin)
-{
-    QMessageBox::information(this, "Room created", "Room ID: " + roomId + "\nRoom PIN: " + roomPin);
 }
 
 void MenuWidget::joinRoomButtonHit()
@@ -55,5 +51,6 @@ void MenuWidget::validateData()
 
 void MenuWidget::roomError(const QString &error)
 {
-    QMessageBox::critical(this, "Error", error);
+    auto *box = new NonBlockingMessageBox(this, "Error", error, QMessageBox::Warning);
+    box->showWithTimeout();
 }

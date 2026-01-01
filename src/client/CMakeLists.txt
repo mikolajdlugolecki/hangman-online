@@ -10,6 +10,7 @@ set(CLIENT_SOURCES
 
         TcpClient.cpp
         GameState.cpp
+        NonBlockingMessagebox.cpp
 
         MainWindow.cpp
 
@@ -26,6 +27,7 @@ set(CLIENT_SOURCES
 set(CLIENT_HEADERS
         TcpClient.h
         GameState.h
+        NonBlockingMessagebox.h
 
         MainWindow.h
 

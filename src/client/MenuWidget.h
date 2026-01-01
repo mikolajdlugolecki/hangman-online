@@ -16,7 +16,6 @@ class MenuWidget : public QWidget
 public:
     explicit MenuWidget(QWidget *parent = nullptr);
     ~MenuWidget() override;
-    void roomCreated(const QString &roomId, const QString &roomPin);
     void roomError(const QString &error);
 
 private:

@@ -1,5 +1,6 @@
 #include "ConnectWidget.h"
 
+#include "NonBlockingMessagebox.h"
 #include "ui_ConnectWidget.h"
 
 #include <QMessageBox>
@@ -28,7 +29,8 @@ void ConnectWidget::connectButtonHit()
 
 void ConnectWidget::connectionTimedOut()
 {
-    QMessageBox::critical(this, "Error", "Connection timed out");
+    auto *box = new NonBlockingMessageBox(this, "Error", "Connection timed out", QMessageBox::Warning);
+    box->showWithTimeout();
     this->ui->hostLineEdit->setEnabled(true);
     this->ui->portSpinBox->setEnabled(true);
     this->ui->connectBtn->setEnabled(true);
@@ -36,7 +38,8 @@ void ConnectWidget::connectionTimedOut()
 
 void ConnectWidget::connectionLost()
 {
-    QMessageBox::critical(this, "Error", "Connection lost");
+    auto *box = new NonBlockingMessageBox(this, "Error", "Connection lost", QMessageBox::Critical);
+    box->showWithTimeout();
     this->ui->hostLineEdit->setEnabled(true);
     this->ui->portSpinBox->setEnabled(true);
     this->ui->connectBtn->setEnabled(true);

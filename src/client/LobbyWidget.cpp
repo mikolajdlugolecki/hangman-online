@@ -1,5 +1,6 @@
 #include "LobbyWidget.h"
 
+#include "NonBlockingMessagebox.h"
 #include "ui_LobbyWidget.h"
 
 #include <QMessageBox>
@@ -33,7 +34,8 @@ void LobbyWidget::lobbyOwnershipReceived()
 {
     GameState::instance().isRoomOwner = true;
     this->ui->startGameButton->setVisible(true);
-    QMessageBox::information(this, "Info", "You are now a new owner of this room");
+    auto *box = new NonBlockingMessageBox(this, "Info", "You are now a new owner of this room");
+    box->showWithTimeout();
 }
 
 void LobbyWidget::updateLobbyPlayerList(const QVector<QString> &nicknames)
