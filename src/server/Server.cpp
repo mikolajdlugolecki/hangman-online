@@ -204,6 +204,11 @@ void Server::checkGuess(Client *client, const char &letter)
         stats->errors++;
         stats->recalculateScore();
         client->addMessageToBuffer(ServerMessageTypes::GUESS_WRONG, std::to_string(stats->score));
+
+        if (stats->errors == room->game->maxErrors) {
+            client->inGame = false;
+            client->addMessageToBuffer(ServerMessageTypes::ROUND_SINGLE_OVER, room->getStats(client));
+        }
     }
 
     if (stats->fullWordGuessed)

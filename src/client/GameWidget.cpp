@@ -106,8 +106,9 @@ void GameWidget::gameRemainingTimeReceived(const QString &seconds)
 
 void GameWidget::roundOverReceived(int type, const std::vector<std::string> &payload)
 {
-    ui->guessButton->setEnabled(false);
-    ui->guessLineEdit->setEnabled(false);
+    this->ui->guessButton->setEnabled(false);
+    this->ui->guessLineEdit->setEnabled(false);
+
     switch (type)
     {
     case 1:
@@ -117,6 +118,9 @@ void GameWidget::roundOverReceived(int type, const std::vector<std::string> &pay
                                      "\nErrors: " + QString::fromStdString(payload[1]));
         break;
     case 2:
+        QMessageBox::critical(this, "Info", "Maximum errors reached\n\nYour results:\n\nPoints: " + QString::fromStdString(payload[0]) + "\nErrors: " + QString::fromStdString(payload[1]));
+        break;
+    case 3:
         QMessageBox::information(this,
                                  "Everyone's done",
                                  "Final result:\n\n" + QString::fromStdString(payload[0]) +
@@ -124,7 +128,7 @@ void GameWidget::roundOverReceived(int type, const std::vector<std::string> &pay
                                      (payload.size() == 3 ? QString::fromStdString(payload[2]) : ""));
         emit leaveGame();
         break;
-    case 3:
+    case 4:
         QMessageBox::critical(this,
                               "Time's up!",
                               "Final result:\n\n" + QString::fromStdString(payload[0]) +

@@ -124,11 +124,14 @@ void TcpClient::onReadyRead()
 
             emit this->roundOver(1, Parser::splitMessage(message->payload));
             break;
-        case ServerMessageTypes::ROUND_ALL_FINISHED:
+        case ServerMessageTypes::ROUND_SINGLE_OVER:
             emit this->roundOver(2, Parser::splitMessage(message->payload));
             break;
-        case ServerMessageTypes::ROUND_TIMEOUT:
+        case ServerMessageTypes::ROUND_ALL_FINISHED:
             emit this->roundOver(3, Parser::splitMessage(message->payload));
+            break;
+        case ServerMessageTypes::ROUND_TIMEOUT:
+            emit this->roundOver(4, Parser::splitMessage(message->payload));
             break;
         case ServerMessageTypes::GAME_STATE:
             std::vector<std::string> result = Parser::splitMessage(message->payload);
