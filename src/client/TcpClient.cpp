@@ -109,10 +109,13 @@ void TcpClient::onReadyRead()
             this->sendMessage(ClientMessageTypes::PONG, "");
             break;
         case ServerMessageTypes::GUESS_OK:
-            emit this->guessCorrect(QString::fromStdString(message->payload));
-            break;
+        {
+            std::vector<std::string> result = Parser::splitMessage(message->payload);
+            emit this->guessCorrect(QString::fromStdString(result[0]), QString::fromStdString(result[1]));
+        }
+        break;
         case ServerMessageTypes::GUESS_WRONG:
-            emit this->guessIncorrect();
+            emit this->guessIncorrect(QString::fromStdString(message->payload));
             break;
         case ServerMessageTypes::REMAINING_TIME:
             emit this->gameRemainingTime(QString::fromStdString(message->payload));

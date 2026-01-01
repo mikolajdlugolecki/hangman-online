@@ -196,16 +196,15 @@ void Server::checkGuess(Client *client, const char &letter)
     if (stats->isLetterCorrect(letter))
     {
         stats->letterGuessed(room->game->word, letter);
-
-        client->addMessageToBuffer(ServerMessageTypes::GUESS_OK, stats->wordWithHiddenChars);
+        stats->recalculateScore();
+        client->addMessageToBuffer(ServerMessageTypes::GUESS_OK, stats->wordWithHiddenChars + "|" + std::to_string(stats->score));
     }
     else
     {
         stats->errors++;
-        client->addMessageToBuffer(ServerMessageTypes::GUESS_WRONG, "");
+        stats->recalculateScore();
+        client->addMessageToBuffer(ServerMessageTypes::GUESS_WRONG, std::to_string(stats->score));
     }
-
-    stats->recalculateScore();
 
     if (stats->fullWordGuessed)
     {

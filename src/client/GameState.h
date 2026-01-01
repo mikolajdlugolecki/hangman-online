@@ -22,6 +22,7 @@ public:
     QString wordLength;
     int currentErrors;
     QString maxErrors;
+    int currentScore;
     QString wordWithHiddenChars;
     QString lastGuessedLetter;
     int remainingTime;

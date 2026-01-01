@@ -23,8 +23,8 @@ public:
               const QString &maxErrors,
               const QString &maxSeconds,
               const QString &coveredWord);
-    void guessCorrect(const QString &newWordWithHiddenChars);
-    void guessIncorrect();
+    void guessCorrect(const QString &newWordWithHiddenChars, const QString &currentScore);
+    void guessIncorrect(const QString &currentScore);
     void gameStatsReceived(const std::vector<std::string> &stats);
     void gameRemainingTimeReceived(const QString &seconds);
     void roundOverReceived(int type, const std::vector<std::string> &payload);

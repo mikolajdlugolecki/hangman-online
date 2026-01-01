@@ -47,8 +47,8 @@ signals:
     void updateLobbyPlayerList(QVector<QString> nicknames);
     void gameStarted(QString wordLength, QString maxErrors, QString maxSeconds, QString coveredWord);
     void gameState(std::vector<std::string> stats);
-    void guessCorrect(QString newWordWithHiddenChars);
-    void guessIncorrect();
+    void guessCorrect(QString newWordWithHiddenChars, QString currentScore);
+    void guessIncorrect(QString currentScore);
     void gameRemainingTime(QString seconds);
     void roundOver(int type, std::vector<std::string> payload);
 };
