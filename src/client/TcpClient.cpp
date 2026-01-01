@@ -106,15 +106,12 @@ void TcpClient::onReadyRead()
         }
         break;
         case ServerMessageTypes::PING:
-            sendMessage(ClientMessageTypes::PONG, "");
+            this->sendMessage(ClientMessageTypes::PONG, "");
             break;
         case ServerMessageTypes::GUESS_OK:
-        {
             emit this->guessCorrect(QString::fromStdString(message->payload));
-        }
-        break;
+            break;
         case ServerMessageTypes::REMAINING_TIME:
-            // emit this->guessIncorrect();
             emit this->gameRemainingTime(QString::fromStdString(message->payload));
             break;
         case ServerMessageTypes::ROUND_SINGLE_FINISHED:

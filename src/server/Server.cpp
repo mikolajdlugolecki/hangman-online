@@ -23,19 +23,19 @@ void Server::timerThread() const
     {
         sleep(1);
 
-		char c = 'W';
-    	write(timerPipeFds[1], &c, 1);
+        char c = 'W';
+        write(timerPipeFds[1], &c, 1);
     }
 }
 
 Server::Server(const int port, std::atomic<bool> &running) : running(running)
 {
-	if(pipe(timerPipeFds) == -1)
-	{
-		perror("pipe");
-        exit(1);
-	}
-	fcntl(timerPipeFds[0], F_SETFL, O_NONBLOCK);
+    if (pipe(timerPipeFds) == -1)
+    {
+        perror("Error creating pipe");
+        exit(EXIT_FAILURE);
+    }
+    fcntl(timerPipeFds[0], F_SETFL, O_NONBLOCK);
 
     this->socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (this->socket == -1)
@@ -72,10 +72,10 @@ Server::Server(const int port, std::atomic<bool> &running) : running(running)
     pfd.events = POLLIN;
     this->pfds.push_back(pfd);
 
-	pollfd pfdTimer{};
-	pfdTimer.fd = timerPipeFds[0];
-	pfdTimer.events = POLLIN;
-	this->pfds.push_back(pfdTimer);
+    pollfd pfdTimer{};
+    pfdTimer.fd = timerPipeFds[0];
+    pfdTimer.events = POLLIN;
+    this->pfds.push_back(pfdTimer);
 
     this->parser = new Parser();
 
@@ -334,20 +334,20 @@ bool Server::validateNickname(Client *client, const std::string &nickname) const
     return true;
 }
 
-void Server::secondElapsed()
+void Server::secondElapsed() const
 {
-	for (const auto &room : this->rooms)
-	{
-		if (room->game && room->game->inProgress)
-		{
-			room->updateGame();
-		}
-	}
+    for (const auto &room : this->rooms)
+    {
+        if (room->game && room->game->inProgress)
+        {
+            room->updateGame();
+        }
+    }
 
-	for (const auto &client : this->clients)
-	{
-		client->tick();
-	}
+    for (const auto &client : this->clients)
+    {
+        client->tick();
+    }
 }
 
 void Server::run()
@@ -359,19 +359,19 @@ void Server::run()
         {
             this->acceptNewClient();
         }
-		if(this->pfds[1].revents & POLLIN)
-		{
-			char temp[64];
-		    while (read(timerPipeFds[0], temp, sizeof(temp)) > 0)
-			{ }
+        if (this->pfds[1].revents & POLLIN)
+        {
+            char temp[64];
+            while (read(timerPipeFds[0], temp, sizeof(temp)) > 0)
+            {
+            }
 
-			secondElapsed();
-		}
+            secondElapsed();
+        }
         for (size_t i = 2; i < this->pfds.size(); i++)
         {
             this->handleClient(i);
         }
-        
     }
 }
 
