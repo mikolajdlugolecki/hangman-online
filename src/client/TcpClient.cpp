@@ -111,6 +111,9 @@ void TcpClient::onReadyRead()
         case ServerMessageTypes::GUESS_OK:
             emit this->guessCorrect(QString::fromStdString(message->payload));
             break;
+        case ServerMessageTypes::GUESS_WRONG:
+            emit this->guessIncorrect();
+            break;
         case ServerMessageTypes::REMAINING_TIME:
             emit this->gameRemainingTime(QString::fromStdString(message->payload));
             break;

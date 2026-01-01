@@ -32,14 +32,15 @@ enum Type
     ROOM_UPDATE,             // player1:status:errors:points|player2:...
     GAME_STARTED,            // word_length|max_errors|max_time
     GUESS_OK,                // *empty*
+    GUESS_WRONG,             // *empty*
     REMAINING_TIME,          // seconds_left
     GAME_STATE,              // masked_word|errors_left|time_left
-    ROUND_TIMEOUT, // 1st_nick:1st_points:1st_errors|2nd_nick:2nd_points:2nd_errors[|3rd_nick:3rd_points:3rd_errors]
-    ROUND_SINGLE_FINISHED, // points|errors
-    ROUND_ALL_FINISHED, // 1st_nick:1st_points:1st_errors|2nd_nick:2nd_points:2nd_errors[|3rd_nick:3rd_points:3rd_errors]
-    GAME_SUMMARY,       // player1:points|player2:...
-    PING,               // *empty*
-    REAUTH              // pin
+    ROUND_TIMEOUT,           // 1st_nick:1st_points:1st_errors|2nd_nick:2nd_points:2nd_errors[|3rd_nick:3rd_points:3rd_errors]
+    ROUND_SINGLE_FINISHED,   // points|errors
+    ROUND_ALL_FINISHED,      // 1st_nick:1st_points:1st_errors|2nd_nick:2nd_points:2nd_errors[|3rd_nick:3rd_points:3rd_errors]
+    GAME_SUMMARY,            // player1:points|player2:...
+    PING,                    // *empty*
+    REAUTH                   // pin
 };
 }
 

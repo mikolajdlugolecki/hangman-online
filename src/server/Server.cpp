@@ -202,6 +202,7 @@ void Server::checkGuess(Client *client, const char &letter)
     else
     {
         stats->errors++;
+        client->addMessageToBuffer(ServerMessageTypes::GUESS_WRONG, "");
     }
 
     stats->recalculateScore();
