@@ -198,15 +198,6 @@ void Server::checkGuess(Client *client, const char &letter)
         stats->letterGuessed(room->game->word, letter);
 
         client->addMessageToBuffer(ServerMessageTypes::GUESS_OK, stats->wordWithHiddenChars);
-
-        if (stats->fullWordGuessed)
-        {
-            client->inGame = false;
-            if (!room->allClientsFinished())
-            {
-                client->addMessageToBuffer(ServerMessageTypes::ROUND_SINGLE_FINISHED, room->getStats(client));
-            }
-        }
     }
     else
     {
@@ -214,6 +205,16 @@ void Server::checkGuess(Client *client, const char &letter)
     }
 
     stats->recalculateScore();
+
+    if (stats->fullWordGuessed)
+    {
+        client->inGame = false;
+        if (!room->allClientsFinished())
+        {
+            client->addMessageToBuffer(ServerMessageTypes::ROUND_SINGLE_FINISHED, room->getStats(client));
+        }
+    }
+
     room->broadcastPlayersGameStats();
 }
 
