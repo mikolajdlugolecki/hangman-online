@@ -228,6 +228,10 @@ void Room::join(Client *client)
         {
             return;
         }
+        if(this->game->inProgress == false)
+        {
+            return;
+        }
 
         client->inGame = this->game->inProgress;
 
