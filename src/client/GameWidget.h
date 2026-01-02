@@ -39,6 +39,7 @@ private:
     void regenerateCharacterButtons();
     QString transformWord(const QString &word);
     void updateTime();
+    void drawHangman(QString errors);
 
 signals:
     void guessRequested(const QString &letter);

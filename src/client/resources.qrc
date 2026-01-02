@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>images/hangman_0.png</file>
+        <file>images/hangman_1.png</file>
+        <file>images/hangman_2.png</file>
+        <file>images/hangman_3.png</file>
+        <file>images/hangman_4.png</file>
+        <file>images/hangman_5.png</file>
+        <file>images/hangman_6.png</file>
+        <file>images/hangman_7.png</file>
+        <file>images/hangman_8.png</file>
+        <file>images/hangman_9.png</file>
+        <file>images/hangman_10.png</file>
+    </qresource>
+    <qresource prefix="/new/prefix1"/>
+</RCC>

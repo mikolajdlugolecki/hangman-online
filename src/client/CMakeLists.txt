@@ -52,10 +52,13 @@ set(CLIENT_UI
         GameWidget.ui
 )
 
+qt_add_resources(CLIENT_RESOURCES resources.qrc)
+
 qt_add_executable(Client
         ${CLIENT_SOURCES}
         ${CLIENT_HEADERS}
         ${CLIENT_UI}
+        ${CLIENT_RESOURCES}
 )
 
 target_include_directories(Client

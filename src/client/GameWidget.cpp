@@ -47,6 +47,8 @@ void GameWidget::init(const QString &wordLength,
         unusedCharacters.push_back(QString(static_cast<char>(i)));
     }
     regenerateCharacterButtons();
+
+    drawHangman("0");
 }
 
 void GameWidget::regenerateCharacterButtons()
@@ -104,14 +106,32 @@ void GameWidget::guessCorrect(const QString &newWordWithHiddenChars, const QStri
     this->ui->scoreLabel->setText(currentScore + " / 100");
 }
 
+void GameWidget::drawHangman(QString errors)
+{
+    QString path = QString(":/images/images/hangman_%1.png").arg(errors);
+
+    QPixmap pix(path);
+    if(!pix.isNull())
+    {
+        this->ui->imgLabel->setPixmap(pix);
+    }
+    else
+    {
+        qDebug() << "Resource not found at:" << path;
+    }
+}
+
 void GameWidget::guessIncorrect(const QString &currentScore)
 {
     GameState::instance().currentScore = currentScore.toInt();
 
-    QString errorsLabel = QString::fromStdString(std::to_string(++GameState::instance().currentErrors)) + " / " +
+    QString currentErrors = QString::fromStdString(std::to_string(++GameState::instance().currentErrors));
+    QString errorsLabel = currentErrors + " / " +
                           GameState::instance().maxErrors;
     this->ui->errorsLabel->setText(errorsLabel);
     this->ui->scoreLabel->setText(currentScore + " / 100");
+
+    drawHangman(currentErrors);
 }
 
 void GameWidget::gameStatsReceived(const std::vector<std::string> &stats)
