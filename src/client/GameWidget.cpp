@@ -47,7 +47,7 @@ void GameWidget::init(const QString &wordLength,
     this->timer->start(1000);
     this->updateTime();
 
-    for(int i = static_cast<int>('A'); i <= static_cast<int>('Z'); i++)
+    for (int i = static_cast<int>('A'); i <= static_cast<int>('Z'); i++)
     {
         unusedCharacters.push_back(QString(static_cast<char>(i)));
     }
@@ -61,8 +61,10 @@ void GameWidget::regenerateCharacterButtons()
     auto gridLayout = this->ui->charactersGridLayout;
 
     QLayoutItem *item;
-    while ((item = gridLayout->takeAt(0)) != nullptr) {
-        if (item->widget()) {
+    while ((item = gridLayout->takeAt(0)) != nullptr)
+    {
+        if (item->widget())
+        {
             item->widget()->deleteLater();
         }
         delete item;
@@ -75,19 +77,22 @@ void GameWidget::regenerateCharacterButtons()
         int row = i / maxColumns;
         int column = i % maxColumns;
 
-        QPushButton *btn = new QPushButton(unusedCharacters[i], this);
-        btn->setMinimumSize(40, 40);
+        QPushButton *button = new QPushButton(unusedCharacters[i], this);
+        button->setMinimumSize(40, 40);
 
-        gridLayout->addWidget(btn, row, column);
+        gridLayout->addWidget(button, row, column);
 
-        connect(btn, &QPushButton::clicked, [=]() {
-            QString letter = btn->text();
-            int indexToRemove = unusedCharacters.indexOf(letter);
-            unusedCharacters.removeAt(indexToRemove);
-            btn->setVisible(false);
-            GameState::instance().lastGuessedLetter = letter;
-            emit this->guessRequested(letter);
-        });
+        connect(button,
+                &QPushButton::clicked,
+                [=]()
+                {
+                    QString letter = button->text();
+                    int indexToRemove = unusedCharacters.indexOf(letter);
+                    unusedCharacters.removeAt(indexToRemove);
+                    button->setVisible(false);
+                    GameState::instance().lastGuessedLetter = letter;
+                    emit this->guessRequested(letter);
+                });
     }
 }
 
@@ -116,7 +121,7 @@ void GameWidget::drawHangman(QString errors)
     QString path = QString(":/images/images/hangman_%1.png").arg(errors);
 
     QPixmap pix(path);
-    if(!pix.isNull())
+    if (!pix.isNull())
     {
         this->ui->imgLabel->setPixmap(pix);
     }
@@ -131,8 +136,7 @@ void GameWidget::guessIncorrect(const QString &currentScore)
     GameState::instance().currentScore = currentScore.toInt();
 
     QString currentErrors = QString::fromStdString(std::to_string(++GameState::instance().currentErrors));
-    QString errorsLabel = currentErrors + " / " +
-                          GameState::instance().maxErrors;
+    QString errorsLabel = currentErrors + " / " + GameState::instance().maxErrors;
     this->ui->errorsLabel->setText(errorsLabel);
     this->ui->scoreLabel->setText(currentScore + " / 100");
 
@@ -157,9 +161,11 @@ void GameWidget::gameRemainingTimeReceived(const QString &seconds)
 void GameWidget::roundOverReceived(int type, const std::vector<std::string> &payload)
 {
     auto gridLayout = this->ui->charactersGridLayout;
-    for (int i = 0; i < gridLayout->count(); ++i) {
+    for (int i = 0; i < gridLayout->count(); ++i)
+    {
         QWidget *widget = gridLayout->itemAt(i)->widget();
-        if (QPushButton *btn = qobject_cast<QPushButton*>(widget)) {
+        if (QPushButton *btn = qobject_cast<QPushButton *>(widget))
+        {
             btn->setEnabled(false);
         }
     }

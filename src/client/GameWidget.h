@@ -2,13 +2,12 @@
 #define GAMEWIDGET_H
 
 #include <QAbstractItemView>
+#include <QGridLayout>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTableWidgetItem>
 #include <QTimer>
 #include <QWidget>
-#include <QGridLayout>
-#include <QPushButton>
 
 namespace Ui
 {
