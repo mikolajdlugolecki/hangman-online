@@ -7,7 +7,7 @@
 #include <iostream>
 #include <random>
 
-Room::Room(Server *server, Client *owner)
+Room::Room(Server *server, const std::shared_ptr<Client>& owner)
 {
     owner->room = this;
     this->server = server;
@@ -38,17 +38,17 @@ std::string Room::getGameResult()
 {
     std::string result;
 
-    std::vector<std::pair<Client *, std::shared_ptr<GameStats>>> vec(this->gameStats.begin(), this->gameStats.end());
+    std::vector<std::pair<std::shared_ptr<Client>, std::shared_ptr<GameStats>>> vec(this->gameStats.begin(), this->gameStats.end());
 
     std::sort(vec.begin(),
               vec.end(),
               [](const auto &a, const auto &b)
               {
-                  if (a.second.get()->score != b.second.get()->score)
+                  if (a.second->score != b.second->score)
                   {
-                      return a.second.get()->score > b.second.get()->score;
+                      return a.second->score > b.second->score;
                   }
-                  return a.second.get()->errors < b.second.get()->errors;
+                  return a.second->errors < b.second->errors;
               });
 
     size_t limit;
@@ -65,9 +65,8 @@ std::string Room::getGameResult()
     for (size_t i = 0; i < limit; i++)
     {
         const auto &[client, stats] = vec[i];
-        // TODO: if client left during game, there is a heap user after free warning
-        result += std::to_string(i + 1) + ". " + client->nickname + " - " + std::to_string(stats.get()->score) +
-                  " points - " + std::to_string(stats.get()->errors) + " errors\n";
+            result += std::to_string(i + 1) + ". " + client->nickname + " - " + std::to_string(stats->score) +
+                  " points - " + std::to_string(stats->errors) + " errors\n";
         if (static_cast<int>(i) != std::min(2, static_cast<int>(vec.size()) - 1))
         {
             result += "|";
@@ -79,7 +78,7 @@ std::string Room::getGameResult()
 
 void Room::broadcastMessage(const ServerMessageTypes::Type type, const std::string &payload) const
 {
-    for (const auto client : this->clients)
+    for (const auto& client : this->clients)
     {
         client->addMessageToBuffer(type, payload);
     }
@@ -199,15 +198,15 @@ void Room::broadcastPlayersGameStats() const
     this->broadcastMessage(ServerMessageTypes::GAME_STATE, payload);
 }
 
-void Room::join(Client *client)
+void Room::join(const std::shared_ptr<Client>& client)
 {
-    Client *disconnectedClient = nullptr;
+    std::shared_ptr<Client> disconnectedClient = nullptr;
     for (size_t i = 0; i < disconnectedClients.size(); i++)
     {
         auto current = disconnectedClients[i];
         if (current.get()->nickname == client->nickname)
         {
-            disconnectedClient = current.get();
+            disconnectedClient = current;
             disconnectedClients.erase(disconnectedClients.begin() + i);
             break;
         }
@@ -249,17 +248,15 @@ void Room::join(Client *client)
     }
 }
 
-Client *Room::leave(const std::shared_ptr<Client> clientShared)
+std::shared_ptr<Client> Room::leave(const std::shared_ptr<Client> &client)
 {
-    auto client = clientShared.get();
-
     const auto iterator = std::find(this->clients.begin(), this->clients.end(), client);
     if (iterator == this->clients.end())
     {
         return nullptr;
     }
 
-    disconnectedClients.push_back(clientShared);
+    disconnectedClients.push_back(client);
 
     const bool wasOwner = (client == this->owner);
     this->clients.erase(iterator);
@@ -288,7 +285,7 @@ Client *Room::leave(const std::shared_ptr<Client> clientShared)
     return wasOwner ? this->owner : nullptr;
 }
 
-bool Room::isClientInRoom(const Client *client) const
+bool Room::isClientInRoom(const std::shared_ptr<Client>& client) const
 {
     for (auto &roomClient : this->clients)
     {
@@ -307,7 +304,7 @@ void Room::startGame()
     this->game = std::make_unique<Game>(10, 60 * 5);
 
     this->gameStats.clear();
-    for (auto client : this->clients)
+    for (const auto& client : this->clients)
     {
         client->inGame = true;
         this->gameStats[client] = std::make_shared<GameStats>(this, this->game->word);
@@ -351,7 +348,7 @@ void Room::updateGame()
 
 bool Room::allClientsFinished() const
 {
-    for (const auto client : this->clients)
+    for (const auto& client : this->clients)
     {
         if (client->inGame)
         {
@@ -361,7 +358,7 @@ bool Room::allClientsFinished() const
     return true;
 }
 
-std::string Room::getStats(Client *client)
+std::string Room::getStats(const std::shared_ptr<Client>& client)
 {
     return std::to_string(this->gameStats[client]->score) + "|" + std::to_string(this->gameStats[client]->errors);
 }

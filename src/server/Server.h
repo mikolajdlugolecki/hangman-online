@@ -16,7 +16,7 @@ public:
     Server(int port, std::atomic<bool> &running);
     ~Server();
     void run();
-    void sendBufferData(Client *client) const;
+    void sendBufferData(const std::shared_ptr<Client>& client) const;
 
 private:
     int socket{};
@@ -31,14 +31,14 @@ private:
 
     void acceptNewClient();
     void handleClient(size_t client_index);
-    void handleMessage(std::shared_ptr<Client> clientShared, const Message *message);
-    bool validateNickname(Client *client, const std::string &nickname) const;
-    void createNewRoom(Client *client);
-    void joinRoom(Client *client, const std::string &id, const std::string &pin) const;
-    void leaveRoom(const std::shared_ptr<Client> client);
-    void startGame(const Client *roomOwner) const;
+    void handleMessage(const std::shared_ptr<Client>& client, const Message *message);
+    bool validateNickname(const std::shared_ptr<Client>& client, const std::string &nickname) const;
+    void createNewRoom(const std::shared_ptr<Client>& client);
+    void joinRoom(const std::shared_ptr<Client>& client, const std::string &id, const std::string &pin) const;
+    void leaveRoom(const std::shared_ptr<Client>& client);
+    void startGame(const std::shared_ptr<Client>& roomOwner) const;
     void timerThread() const;
-    void checkGuess(Client *client, const char &letter);
+    void checkGuess(const std::shared_ptr<Client>& client, const char &letter);
 };
 
 #endif

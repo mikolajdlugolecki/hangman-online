@@ -33,7 +33,7 @@ Room *findRoom(const std::vector<std::unique_ptr<Room>> &rooms, const std::strin
     return nullptr;
 }
 
-void writeDebugLog(const Client *client, const std::string &message)
+void writeDebugLog(const std::shared_ptr<Client>& client, const std::string &message)
 {
     std::cout << client->addressToString() << " --- " << message << std::endl;
 }

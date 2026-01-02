@@ -115,7 +115,7 @@ void Server::acceptNewClient()
     pfd.events = POLLIN | POLLOUT;
     this->clients.push_back(std::make_shared<Client>(clientSocket, clientAddress));
     this->pfds.push_back(pfd);
-    Utils::writeDebugLog(this->clients.back().get(), "New client accepted");
+    Utils::writeDebugLog(this->clients.back(), "New client accepted");
 }
 
 void Server::handleClient(const size_t client_index)
@@ -123,7 +123,7 @@ void Server::handleClient(const size_t client_index)
     if (this->pfds[client_index].revents & POLLIN)
     {
         char buffer[MSG_SIZE]{};
-        Client *client = this->clients[client_index - 2].get();
+        const std::shared_ptr<Client> client = this->clients[client_index - 2];
         const size_t bytes = read(client->socket, buffer, MSG_SIZE);
         client->receivingBuffer.insert(client->receivingBuffer.end(), buffer, buffer + bytes);
 
@@ -152,12 +152,12 @@ void Server::handleClient(const size_t client_index)
 
     if (this->pfds[client_index].revents & POLLOUT)
     {
-        Client *client = this->clients[client_index - 2].get();
+        const std::shared_ptr<Client> client = this->clients[client_index - 2];
         this->sendBufferData(client);
     }
 }
 
-void Server::startGame(const Client *roomOwner) const
+void Server::startGame(const std::shared_ptr<Client>& roomOwner) const
 {
     auto *room = roomOwner->room;
 
@@ -170,7 +170,7 @@ void Server::startGame(const Client *roomOwner) const
     room->startGame();
 }
 
-void Server::checkGuess(Client *client, const char &letter)
+void Server::checkGuess(const std::shared_ptr<Client>& client, const char &letter)
 {
     auto *room = client->room;
 
@@ -225,7 +225,7 @@ void Server::checkGuess(Client *client, const char &letter)
     room->broadcastPlayersGameStats();
 }
 
-void Server::createNewRoom(Client *client)
+void Server::createNewRoom(const std::shared_ptr<Client>& client)
 {
     auto room = std::make_unique<Room>(this, client);
     client->addMessageToBuffer(ServerMessageTypes::ROOM_CREATED, room->id + "|" + room->pin);
@@ -233,7 +233,7 @@ void Server::createNewRoom(Client *client)
     this->rooms.push_back(std::move(room));
 }
 
-void Server::joinRoom(Client *client, const std::string &id, const std::string &pin) const
+void Server::joinRoom(const std::shared_ptr<Client>& client, const std::string &id, const std::string &pin) const
 {
     const auto room = Utils::findRoom(this->rooms, id);
 
@@ -259,18 +259,18 @@ void Server::joinRoom(Client *client, const std::string &id, const std::string &
     Utils::writeDebugLog(client, "Joined room ID = " + room->id);
 }
 
-void Server::leaveRoom(const std::shared_ptr<Client> client)
+void Server::leaveRoom(const std::shared_ptr<Client>& client)
 {
     const auto room = client->room;
 
     if (room == nullptr)
     {
-        Utils::writeDebugLog(client.get(), "Could not find the client's room");
+        Utils::writeDebugLog(client, "Could not find the client's room");
         return;
     }
 
-    auto *newOwner = room->leave(client);
-    Utils::writeDebugLog(client.get(), "Client left room ID = " + room->id);
+    const std::shared_ptr<Client> newOwner = room->leave(client);
+    Utils::writeDebugLog(client, "Client left room ID = " + room->id);
 
     if (newOwner != nullptr)
     {
@@ -282,10 +282,8 @@ void Server::leaveRoom(const std::shared_ptr<Client> client)
     }
 }
 
-void Server::handleMessage(std::shared_ptr<Client> clientShared, const Message *message)
+void Server::handleMessage(const std::shared_ptr<Client>& client, const Message *message)
 {
-    auto client = clientShared.get();
-
     switch (message->type)
     {
     case ClientMessageTypes::LOGIN:
@@ -310,7 +308,7 @@ void Server::handleMessage(std::shared_ptr<Client> clientShared, const Message *
     }
     break;
     case ClientMessageTypes::LEAVE_ROOM:
-        leaveRoom(clientShared);
+        leaveRoom(client);
         break;
     case ClientMessageTypes::START_GAME:
         startGame(client);
@@ -330,7 +328,7 @@ void Server::handleMessage(std::shared_ptr<Client> clientShared, const Message *
     }
 }
 
-bool Server::validateNickname(Client *client, const std::string &nickname) const
+bool Server::validateNickname(const std::shared_ptr<Client>& client, const std::string &nickname) const
 {
     for (auto &c : this->clients)
     {
@@ -384,7 +382,7 @@ void Server::run()
     }
 }
 
-void Server::sendBufferData(Client *client) const
+void Server::sendBufferData(const std::shared_ptr<Client>& client) const
 {
     const size_t minSize = std::min(static_cast<size_t>(MSG_SIZE), client->sendingBuffer.size());
     const auto buffer = new char[minSize];
