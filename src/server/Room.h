@@ -21,7 +21,7 @@ public:
     std::unordered_map<std::shared_ptr<Client>, std::shared_ptr<GameStats>> gameStats;
     std::chrono::steady_clock::time_point lastUpdate;
 
-    Room(Server *server, const std::shared_ptr<Client>& owner);
+    explicit Room(const std::shared_ptr<Client>& owner);
     ~Room();
     void broadcastMessage(ServerMessageTypes::Type type, const std::string &payload) const;
     void broadcastPlayersListLobby() const;
@@ -37,7 +37,6 @@ public:
 
 private:
     std::shared_ptr<Client> owner;
-    Server *server;
     std::vector<std::shared_ptr<Client>> clients;
     static inline int roomCounter = 1;
     std::vector<std::shared_ptr<Client>> disconnectedClients;

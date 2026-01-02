@@ -7,10 +7,9 @@
 #include <iostream>
 #include <random>
 
-Room::Room(Server *server, const std::shared_ptr<Client>& owner)
+Room::Room(const std::shared_ptr<Client>& owner)
 {
     owner->room = this;
-    this->server = server;
     this->owner = owner;
     this->clients.push_back(owner);
     this->id = std::to_string(Room::roomCounter++);
@@ -19,7 +18,6 @@ Room::Room(Server *server, const std::shared_ptr<Client>& owner)
 
 Room::~Room()
 {
-    this->server = nullptr;
     this->owner = nullptr;
     this->clients.clear();
 }
