@@ -8,6 +8,7 @@
 #include <QTableWidgetItem>
 #include <QTimer>
 #include <QWidget>
+#include <QHash>
 
 namespace Ui
 {
@@ -29,12 +30,12 @@ public:
     void gameStatsReceived(const std::vector<std::string> &stats);
     void gameRemainingTimeReceived(const QString &seconds);
     void roundOverReceived(int type, const std::vector<std::string> &payload);
-    void gameRejoined(QString errors, QString score, QString word);
+    void gameRejoined(QString errors, QString score, QString word, QString usedCharacters);
 
 private:
     Ui::GameWidget *ui;
     QTimer *timer = new QTimer(this);
-    QVector<QString> unusedCharacters;
+    QHash<QChar, bool> isCharacterUsed;
 
     void regenerateCharacterButtons();
     QString transformWord(const QString &word);

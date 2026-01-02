@@ -32,6 +32,16 @@ void GameStats::uncoverLetters(const char letter)
     }
 }
 
+std::string GameStats::usedCharactersToString()
+{
+    std::string s = "";
+    for(char c : usedLetters)
+    {
+        s += c;
+    }
+    return s;
+}
+
 void GameStats::markLetterAsUsed(const char letter)
 {
     this->usedLetters.push_back(letter);

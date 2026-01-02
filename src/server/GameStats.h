@@ -28,6 +28,7 @@ public:
 
     void markLetterAsUsed(char letter);
     bool isLetterUsed(char letter) const;
+    std::string usedCharactersToString();
 
     bool isLetterCorrect(char letter) const;
 

@@ -47,10 +47,10 @@ void GameWidget::init(const QString &wordLength,
     this->timer->start(1000);
     this->updateTime();
 
-    unusedCharacters.clear();
+    isCharacterUsed.clear();
     for (int i = static_cast<int>('A'); i <= static_cast<int>('Z'); i++)
     {
-        unusedCharacters.push_back(QString(static_cast<char>(i)));
+        isCharacterUsed[static_cast<QChar>(i)] = false;
     }
     regenerateCharacterButtons();
 
@@ -59,7 +59,7 @@ void GameWidget::init(const QString &wordLength,
 
 #include <iostream>
 
-void GameWidget::gameRejoined(QString errors, QString score, QString word)
+void GameWidget::gameRejoined(QString errors, QString score, QString word, QString usedCharacters)
 {
     QTimer::singleShot(100, this, [=]()
     {
@@ -72,6 +72,12 @@ void GameWidget::gameRejoined(QString errors, QString score, QString word)
         this->ui->scoreLabel->setText(score + " / 100");
 
         drawHangman(errors);
+
+        for(QChar c : usedCharacters)
+        {
+            isCharacterUsed[c] = true;
+        }
+        regenerateCharacterButtons();
     });
 }
 
@@ -92,13 +98,23 @@ void GameWidget::regenerateCharacterButtons()
 
     int maxColumns = 7;
 
-    for (int i = 0; i < unusedCharacters.size(); ++i)
+    for (int i = 0; i < 'Z' - 'A' + 1; ++i)
     {
         int row = i / maxColumns;
         int column = i % maxColumns;
 
-        QPushButton *button = new QPushButton(unusedCharacters[i], this);
+        QChar character = static_cast<QChar>('A' + i);
+
+        QPushButton *button = new QPushButton(character, this);
         button->setMinimumSize(40, 40);
+        QSizePolicy sp = button->sizePolicy();
+        sp.setRetainSizeWhenHidden(true);
+        button->setSizePolicy(sp);
+
+        if(isCharacterUsed[character])
+        {
+            button->hide();
+        }
 
         gridLayout->addWidget(button, row, column);
 
@@ -107,9 +123,8 @@ void GameWidget::regenerateCharacterButtons()
                 [=]()
                 {
                     QString letter = button->text();
-                    int indexToRemove = unusedCharacters.indexOf(letter);
-                    unusedCharacters.removeAt(indexToRemove);
-                    button->setVisible(false);
+                    isCharacterUsed[letter[0]] = true;
+                    button->hide();
                     GameState::instance().lastGuessedLetter = letter;
                     emit this->guessRequested(letter);
                 });

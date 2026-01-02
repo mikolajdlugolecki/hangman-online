@@ -227,7 +227,10 @@ void Room::join(Client *client)
         broadcastPlayersGameStats();
 
         auto stats = this->gameStats[client];
-        std::string payload = std::to_string(stats->errors) + "|" + std::to_string(stats->score) + "|" +  stats->wordWithHiddenChars;
+        std::string payload = std::to_string(stats->errors) + "|" + 
+        std::to_string(stats->score) + "|" +  
+        stats->wordWithHiddenChars + "|" +
+        stats->usedCharactersToString();
         client->addMessageToBuffer(ServerMessageTypes::GAME_REJOINED, payload);
     }
 }
