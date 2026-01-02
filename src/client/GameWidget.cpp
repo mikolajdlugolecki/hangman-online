@@ -63,7 +63,7 @@ void GameWidget::gameRejoined(QString errors, QString score, QString word, QStri
 {
     QTimer::singleShot(100,
                        this,
-                       [=]()
+                       [this, errors, score, word, usedCharacters]()
                        {
                            GameState::instance().currentErrors = errors.toInt();
                            GameState::instance().currentScore = score.toInt();
@@ -122,7 +122,7 @@ void GameWidget::regenerateCharacterButtons()
 
         connect(button,
                 &QPushButton::clicked,
-                [=]()
+                [this, button]()
                 {
                     QString letter = button->text();
                     isCharacterUsed[letter[0]] = true;
