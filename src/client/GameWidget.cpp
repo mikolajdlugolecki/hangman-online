@@ -47,6 +47,7 @@ void GameWidget::init(const QString &wordLength,
     this->timer->start(1000);
     this->updateTime();
 
+    unusedCharacters.clear();
     for (int i = static_cast<int>('A'); i <= static_cast<int>('Z'); i++)
     {
         unusedCharacters.push_back(QString(static_cast<char>(i)));
