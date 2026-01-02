@@ -12,6 +12,11 @@ LobbyWidget::LobbyWidget(QWidget *parent) : QWidget(parent), ui(new Ui::LobbyWid
     connect(this->ui->leaveRoomButton, &QPushButton::clicked, this, &LobbyWidget::leaveRoomButtonHit);
     connect(this->ui->startGameButton, &QPushButton::clicked, this, &LobbyWidget::startGameButtonHit);
     connect(this, &LobbyWidget::listUpdated, this, &LobbyWidget::listChanged);
+
+    QFont monoFont("monospace");
+    monoFont.setStyleHint(QFont::Monospace);
+    monoFont.setPointSize(10);
+    this->ui->listWidget->setFont(monoFont);
 }
 
 LobbyWidget::~LobbyWidget()

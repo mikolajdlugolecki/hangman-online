@@ -10,6 +10,11 @@ GameWidget::GameWidget(QWidget *parent) : QWidget(parent), ui(new Ui::GameWidget
 {
     this->ui->setupUi(this);
     connect(this->timer, &QTimer::timeout, this, &GameWidget::updateTime);
+
+    QFont monoFont("monospace");
+    monoFont.setStyleHint(QFont::Monospace);
+    monoFont.setPointSize(10);
+    this->ui->listWidget->setFont(monoFont);
 }
 
 GameWidget::~GameWidget()
