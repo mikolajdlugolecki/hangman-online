@@ -202,10 +202,10 @@ void Room::broadcastPlayersGameStats() const
 void Room::join(Client *client)
 {
     Client *disconnectedClient = nullptr;
-    for(size_t i = 0; i < disconnectedClients.size(); i++)
+    for (size_t i = 0; i < disconnectedClients.size(); i++)
     {
         auto current = disconnectedClients[i];
-        if(current.get()->nickname == client->nickname)
+        if (current.get()->nickname == client->nickname)
         {
             disconnectedClient = current.get();
             disconnectedClients.erase(disconnectedClients.begin() + i);
@@ -217,7 +217,7 @@ void Room::join(Client *client)
     client->room = this;
     broadcastPlayersListLobby();
 
-    if(disconnectedClient != nullptr)
+    if (disconnectedClient != nullptr)
     {
         client->inGame = true;
         this->gameStats[client] = gameStats[disconnectedClient];
@@ -227,10 +227,8 @@ void Room::join(Client *client)
         broadcastPlayersGameStats();
 
         auto stats = this->gameStats[client];
-        std::string payload = std::to_string(stats->errors) + "|" + 
-        std::to_string(stats->score) + "|" +  
-        stats->wordWithHiddenChars + "|" +
-        stats->usedCharactersToString();
+        std::string payload = std::to_string(stats->errors) + "|" + std::to_string(stats->score) + "|" +
+                              stats->wordWithHiddenChars + "|" + stats->usedCharactersToString();
         client->addMessageToBuffer(ServerMessageTypes::GAME_REJOINED, payload);
     }
 }

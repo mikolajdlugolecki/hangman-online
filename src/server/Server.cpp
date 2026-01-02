@@ -284,7 +284,7 @@ void Server::leaveRoom(const std::shared_ptr<Client> client)
 
 void Server::handleMessage(std::shared_ptr<Client> clientShared, const Message *message)
 {
-	auto client = clientShared.get();
+    auto client = clientShared.get();
 
     switch (message->type)
     {

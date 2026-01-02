@@ -61,24 +61,26 @@ void GameWidget::init(const QString &wordLength,
 
 void GameWidget::gameRejoined(QString errors, QString score, QString word, QString usedCharacters)
 {
-    QTimer::singleShot(100, this, [=]()
-    {
-        GameState::instance().currentErrors = errors.toInt();
-        GameState::instance().currentScore = score.toInt();
-        GameState::instance().wordWithHiddenChars = word;
+    QTimer::singleShot(100,
+                       this,
+                       [=]()
+                       {
+                           GameState::instance().currentErrors = errors.toInt();
+                           GameState::instance().currentScore = score.toInt();
+                           GameState::instance().wordWithHiddenChars = word;
 
-        this->ui->errorsLabel->setText(errors);
-        this->ui->maskedWordLabel->setText(transformWord(word));
-        this->ui->scoreLabel->setText(score + " / 100");
+                           this->ui->errorsLabel->setText(errors);
+                           this->ui->maskedWordLabel->setText(transformWord(word));
+                           this->ui->scoreLabel->setText(score + " / 100");
 
-        drawHangman(errors);
+                           drawHangman(errors);
 
-        for(QChar c : usedCharacters)
-        {
-            isCharacterUsed[c] = true;
-        }
-        regenerateCharacterButtons();
-    });
+                           for (QChar c : usedCharacters)
+                           {
+                               isCharacterUsed[c] = true;
+                           }
+                           regenerateCharacterButtons();
+                       });
 }
 
 void GameWidget::regenerateCharacterButtons()
@@ -111,7 +113,7 @@ void GameWidget::regenerateCharacterButtons()
         sp.setRetainSizeWhenHidden(true);
         button->setSizePolicy(sp);
 
-        if(isCharacterUsed[character])
+        if (isCharacterUsed[character])
         {
             button->hide();
         }

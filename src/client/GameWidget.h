@@ -3,12 +3,12 @@
 
 #include <QAbstractItemView>
 #include <QGridLayout>
+#include <QHash>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTableWidgetItem>
 #include <QTimer>
 #include <QWidget>
-#include <QHash>
 
 namespace Ui
 {

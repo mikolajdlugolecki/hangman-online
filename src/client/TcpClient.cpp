@@ -113,8 +113,8 @@ void TcpClient::onReadyRead()
             const std::string &word = result[2];
             const std::string &usedCharacters = result[3];
             emit this->gameRejoined(QString::fromStdString(errors),
-                                   QString::fromStdString(score),
-                                   QString::fromStdString(word),
+                                    QString::fromStdString(score),
+                                    QString::fromStdString(word),
                                     QString::fromStdString(usedCharacters));
         }
         break;

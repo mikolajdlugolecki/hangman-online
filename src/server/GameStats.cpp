@@ -35,7 +35,7 @@ void GameStats::uncoverLetters(const char letter)
 std::string GameStats::usedCharactersToString()
 {
     std::string s = "";
-    for(char c : usedLetters)
+    for (char c : usedLetters)
     {
         s += c;
     }
