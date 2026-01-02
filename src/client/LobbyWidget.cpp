@@ -43,7 +43,7 @@ void LobbyWidget::lobbyOwnershipReceived()
     box->showWithTimeout();
 }
 
-void LobbyWidget::updateLobbyPlayerList(const QVector<QString> &nicknames)
+void LobbyWidget::updateLobbyPlayerList(QVector<QString> nicknames)
 {
     this->ui->listWidget->clear();
     GameState::instance().roomPlayers.clear();

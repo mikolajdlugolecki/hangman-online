@@ -17,7 +17,7 @@ public:
     explicit LobbyWidget(QWidget *parent = nullptr);
     ~LobbyWidget() override;
     void lobbyOwnershipReceived();
-    void updateLobbyPlayerList(const QVector<QString> &nicknames);
+    void updateLobbyPlayerList(QVector<QString> nicknames);
 
 private:
     Ui::LobbyWidget *ui;

@@ -119,7 +119,7 @@ void Room::broadcastPlayersListLobby() const
         const auto client = this->clients[i];
         message += padRight(client->nickname, maxNicknameSize) + " (" +
                    (client->isConnected ? "connected" : "disconnected") + ")";
-        if (i != size - 1)
+        if (i != size - 1 || size == 1)
         {
             message += "|";
         }

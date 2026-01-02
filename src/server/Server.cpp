@@ -230,6 +230,7 @@ void Server::createNewRoom(const std::shared_ptr<Client>& client)
     auto room = std::make_unique<Room>(client);
     client->addMessageToBuffer(ServerMessageTypes::ROOM_CREATED, room->id + "|" + room->pin);
     Utils::writeDebugLog(client, "Room created ID = " + room->id + " PIN = " + room->pin);
+    room->broadcastPlayersListLobby();
     this->rooms.push_back(std::move(room));
 }
 

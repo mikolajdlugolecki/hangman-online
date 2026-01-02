@@ -54,7 +54,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
                 GameState::instance().roomId = roomId;
                 GameState::instance().roomPin = roomPin;
                 GameState::instance().isRoomOwner = true;
-                GameState::instance().roomPlayers.push_back(GameState::instance().usersNickname);
 
                 stack->setCurrentWidget(LobbyScene);
             });
