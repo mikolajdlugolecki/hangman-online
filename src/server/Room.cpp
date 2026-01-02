@@ -219,9 +219,21 @@ void Room::join(Client *client)
 
     if (disconnectedClient != nullptr)
     {
-        client->inGame = true;
+        bool hasGameStats = gameStats.find(disconnectedClient) != gameStats.end();
+        if (hasGameStats == false)
+        {
+            return;
+        }
+        if (this->game == nullptr)
+        {
+            return;
+        }
+
+        client->inGame = this->game->inProgress;
+
         this->gameStats[client] = gameStats[disconnectedClient];
         gameStats.erase(disconnectedClient);
+
         client->addMessageToBuffer(ServerMessageTypes::GAME_STARTED, this->game->getGameStartedPayload());
         broadcastPlayersListGame();
         broadcastPlayersGameStats();
