@@ -7,6 +7,8 @@
 #include <QTableWidgetItem>
 #include <QTimer>
 #include <QWidget>
+#include <QGridLayout>
+#include <QPushButton>
 
 namespace Ui
 {
@@ -32,7 +34,9 @@ public:
 private:
     Ui::GameWidget *ui;
     QTimer *timer = new QTimer(this);
-    void guessButtonHit();
+    QVector<QString> unusedCharacters;
+
+    void regenerateCharacterButtons();
     QString transformWord(const QString &word);
     void updateTime();
 
