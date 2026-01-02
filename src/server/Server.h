@@ -22,7 +22,7 @@ private:
     int socket{};
     sockaddr_in address{};
     Parser *parser;
-    std::vector<std::unique_ptr<Client>> clients;
+    std::vector<std::shared_ptr<Client>> clients;
     std::vector<pollfd> pfds;
     std::vector<std::unique_ptr<Room>> rooms;
     std::atomic<bool> &running;
@@ -31,11 +31,11 @@ private:
 
     void acceptNewClient();
     void handleClient(size_t client_index);
-    void handleMessage(Client *client, const Message *message);
+    void handleMessage(std::shared_ptr<Client> clientShared, const Message *message);
     bool validateNickname(Client *client, const std::string &nickname) const;
     void createNewRoom(Client *client);
     void joinRoom(Client *client, const std::string &id, const std::string &pin) const;
-    void leaveRoom(const Client *client);
+    void leaveRoom(const std::shared_ptr<Client> client);
     void startGame(const Client *roomOwner) const;
     void timerThread() const;
     void checkGuess(Client *client, const char &letter);

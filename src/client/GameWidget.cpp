@@ -57,6 +57,24 @@ void GameWidget::init(const QString &wordLength,
     drawHangman("0");
 }
 
+#include <iostream>
+
+void GameWidget::gameRejoined(QString errors, QString score, QString word)
+{
+    QTimer::singleShot(100, this, [=]()
+    {
+        GameState::instance().currentErrors = errors.toInt();
+        GameState::instance().currentScore = score.toInt();
+        GameState::instance().wordWithHiddenChars = word;
+
+        this->ui->errorsLabel->setText(errors);
+        this->ui->maskedWordLabel->setText(transformWord(word));
+        this->ui->scoreLabel->setText(score + " / 100");
+
+        drawHangman(errors);
+    });
+}
+
 void GameWidget::regenerateCharacterButtons()
 {
     auto gridLayout = this->ui->charactersGridLayout;
@@ -64,6 +82,7 @@ void GameWidget::regenerateCharacterButtons()
     QLayoutItem *item;
     while ((item = gridLayout->takeAt(0)) != nullptr)
     {
+        gridLayout->removeItem(item);
         if (item->widget())
         {
             item->widget()->deleteLater();

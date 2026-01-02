@@ -28,7 +28,7 @@ public:
     void broadcastPlayersListGame() const;
     void broadcastPlayersGameStats() const;
     void join(Client *client);
-    Client *leave(const Client *client);
+    Client *leave(const std::shared_ptr<Client> clientShared);
     bool isClientInRoom(const Client *client) const;
     void startGame();
     void updateGame();
@@ -40,6 +40,7 @@ private:
     Server *server;
     std::vector<Client *> clients;
     static inline int roomCounter = 1;
+    std::vector<std::shared_ptr<Client>> disconnectedClients;
 
     static std::string generatePin();
     std::string getGameResult();

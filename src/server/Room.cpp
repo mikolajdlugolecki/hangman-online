@@ -201,18 +201,48 @@ void Room::broadcastPlayersGameStats() const
 
 void Room::join(Client *client)
 {
+    Client *disconnectedClient = nullptr;
+    for(size_t i = 0; i < disconnectedClients.size(); i++)
+    {
+        auto current = disconnectedClients[i];
+        if(current.get()->nickname == client->nickname)
+        {
+            disconnectedClient = current.get();
+            disconnectedClients.erase(disconnectedClients.begin() + i);
+            break;
+        }
+    }
+
     this->clients.push_back(client);
     client->room = this;
     broadcastPlayersListLobby();
+
+    if(disconnectedClient != nullptr)
+    {
+        client->inGame = true;
+        this->gameStats[client] = gameStats[disconnectedClient];
+        gameStats.erase(disconnectedClient);
+        client->addMessageToBuffer(ServerMessageTypes::GAME_STARTED, this->game->getGameStartedPayload());
+        broadcastPlayersListGame();
+        broadcastPlayersGameStats();
+
+        auto stats = this->gameStats[client];
+        std::string payload = std::to_string(stats->errors) + "|" + std::to_string(stats->score) + "|" +  stats->wordWithHiddenChars;
+        client->addMessageToBuffer(ServerMessageTypes::GAME_REJOINED, payload);
+    }
 }
 
-Client *Room::leave(const Client *client)
+Client *Room::leave(const std::shared_ptr<Client> clientShared)
 {
+    auto client = clientShared.get();
+
     const auto iterator = std::find(this->clients.begin(), this->clients.end(), client);
     if (iterator == this->clients.end())
     {
         return nullptr;
     }
+
+    disconnectedClients.push_back(clientShared);
 
     const bool wasOwner = (client == this->owner);
     this->clients.erase(iterator);
@@ -231,6 +261,7 @@ Client *Room::leave(const Client *client)
     if (this->game && this->game->inProgress)
     {
         broadcastPlayersListGame();
+        broadcastPlayersGameStats();
     }
     else
     {
@@ -254,7 +285,9 @@ bool Room::isClientInRoom(const Client *client) const
 
 void Room::startGame()
 {
-    this->game = std::make_unique<Game>(10, 60);
+    disconnectedClients.clear();
+
+    this->game = std::make_unique<Game>(10, 60 * 5);
 
     this->gameStats.clear();
     for (auto client : this->clients)

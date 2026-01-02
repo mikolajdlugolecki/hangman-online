@@ -105,6 +105,17 @@ void TcpClient::onReadyRead()
                                    QString::fromStdString(coveredWord));
         }
         break;
+        case ServerMessageTypes::GAME_REJOINED:
+        {
+            std::vector<std::string> result = Parser::splitMessage(message->payload);
+            const std::string &errors = result[0];
+            const std::string &score = result[1];
+            const std::string &word = result[2];
+            emit this->gameRejoined(QString::fromStdString(errors),
+                                   QString::fromStdString(score),
+                                   QString::fromStdString(word));
+        }
+        break;
         case ServerMessageTypes::PING:
             this->sendMessage(ClientMessageTypes::PONG, "");
             break;
@@ -121,7 +132,6 @@ void TcpClient::onReadyRead()
             emit this->gameRemainingTime(QString::fromStdString(message->payload));
             break;
         case ServerMessageTypes::ROUND_SINGLE_FINISHED:
-
             emit this->roundOver(1, Parser::splitMessage(message->payload));
             break;
         case ServerMessageTypes::ROUND_SINGLE_OVER:

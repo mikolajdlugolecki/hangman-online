@@ -113,7 +113,7 @@ void Server::acceptNewClient()
     pollfd pfd{};
     pfd.fd = clientSocket;
     pfd.events = POLLIN | POLLOUT;
-    this->clients.push_back(std::make_unique<Client>(clientSocket, clientAddress));
+    this->clients.push_back(std::make_shared<Client>(clientSocket, clientAddress));
     this->pfds.push_back(pfd);
     Utils::writeDebugLog(this->clients.back().get(), "New client accepted");
 }
@@ -130,7 +130,7 @@ void Server::handleClient(const size_t client_index)
         if (bytes == 0)
         {
             close(client->socket);
-            leaveRoom(client);
+            leaveRoom(this->clients[client_index - 2]);
             Utils::writeDebugLog(client, "Client disconnected");
             this->clients.erase(this->clients.begin() + static_cast<int>(client_index) - 2);
             this->pfds.erase(this->pfds.begin() + static_cast<int>(client_index));
@@ -146,7 +146,7 @@ void Server::handleClient(const size_t client_index)
                                          client->message->payload);
                 // Utils::writeMessageAsHex(client->message);
             }
-            this->handleMessage(client, client->message);
+            this->handleMessage(this->clients[client_index - 2], client->message);
         }
     }
 
@@ -259,18 +259,18 @@ void Server::joinRoom(Client *client, const std::string &id, const std::string &
     Utils::writeDebugLog(client, "Joined room ID = " + room->id);
 }
 
-void Server::leaveRoom(const Client *client)
+void Server::leaveRoom(const std::shared_ptr<Client> client)
 {
     const auto room = client->room;
 
     if (room == nullptr)
     {
-        Utils::writeDebugLog(client, "Could not find the client's room");
+        Utils::writeDebugLog(client.get(), "Could not find the client's room");
         return;
     }
 
     auto *newOwner = room->leave(client);
-    Utils::writeDebugLog(client, "Client left room ID = " + room->id);
+    Utils::writeDebugLog(client.get(), "Client left room ID = " + room->id);
 
     if (newOwner != nullptr)
     {
@@ -282,8 +282,10 @@ void Server::leaveRoom(const Client *client)
     }
 }
 
-void Server::handleMessage(Client *client, const Message *message)
+void Server::handleMessage(std::shared_ptr<Client> clientShared, const Message *message)
 {
+	auto client = clientShared.get();
+
     switch (message->type)
     {
     case ClientMessageTypes::LOGIN:
@@ -308,7 +310,7 @@ void Server::handleMessage(Client *client, const Message *message)
     }
     break;
     case ClientMessageTypes::LEAVE_ROOM:
-        leaveRoom(client);
+        leaveRoom(clientShared);
         break;
     case ClientMessageTypes::START_GAME:
         startGame(client);

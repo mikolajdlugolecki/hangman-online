@@ -31,6 +31,7 @@ enum Type
     ROOM_OWNERSHIP_TRANSFER, // *empty*
     ROOM_UPDATE,             // player1:status:errors:points|player2:...
     GAME_STARTED,            // word_length|max_errors|max_time
+    GAME_REJOINED,           // current_errors|current_score|current_word_state
     GUESS_OK,                // masked_word|current_score
     GUESS_WRONG,             // current_score
     REMAINING_TIME,          // seconds_left

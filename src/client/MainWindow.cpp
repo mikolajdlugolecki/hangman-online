@@ -99,6 +99,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(client, &TcpClient::gameState, GameScene, &GameWidget::gameStatsReceived);
     connect(client, &TcpClient::gameRemainingTime, GameScene, &GameWidget::gameRemainingTimeReceived);
     connect(client, &TcpClient::roundOver, GameScene, &GameWidget::roundOverReceived);
+    connect(client, &TcpClient::gameRejoined, GameScene, &GameWidget::gameRejoined);
     connect(GameScene,
             &GameWidget::leaveGame,
             this,

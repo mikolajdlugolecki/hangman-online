@@ -29,6 +29,7 @@ public:
     void gameStatsReceived(const std::vector<std::string> &stats);
     void gameRemainingTimeReceived(const QString &seconds);
     void roundOverReceived(int type, const std::vector<std::string> &payload);
+    void gameRejoined(QString errors, QString score, QString word);
 
 private:
     Ui::GameWidget *ui;
