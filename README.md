@@ -1,4 +1,32 @@
-# Wisielec przez sieć
+# Wisielec
+
+## Technologie potrzebne do kompilacji projektu
+
+- C++
+- Qt (>= 6.0)
+
+## Kompilacja projektu 
+
+Po sklonowaniu projektu w katalogu głównym projektu można wykorzystać CMakeLists.txt do jednoczesnej kompilacji serwera oraz klienta.
+
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
+
+Następnie serwer można uruchomić poleceniem:
+
+```bash
+./server <port>
+```
+
+A klienta:
+
+```bash
+./Client
+```
 
 ### Opis:
 
