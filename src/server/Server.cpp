@@ -377,7 +377,7 @@ void Server::run()
 
         poll(this->pfds.data(), this->pfds.size(), -1);
 
-        std::cout << "POLL" << std::endl;
+        //std::cout << "POLL" << std::endl;
 
         if (this->pfds[0].revents & POLLIN)
         {
