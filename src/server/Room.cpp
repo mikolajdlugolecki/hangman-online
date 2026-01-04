@@ -261,7 +261,6 @@ std::shared_ptr<Client> Room::leave(const std::shared_ptr<Client> &client)
 
     if (this->clients.empty())
     {
-        // TODO: close room, remove from server's list
         return nullptr;
     }
 
