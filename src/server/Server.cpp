@@ -124,7 +124,11 @@ void Server::handleClient(const size_t client_index)
     {
         char buffer[MSG_SIZE]{};
         const std::shared_ptr<Client> client = this->clients[client_index - 2];
-        const size_t bytes = read(client->socket, buffer, MSG_SIZE);
+        const auto bytes = read(client->socket, buffer, MSG_SIZE);
+        if (bytes < 0)
+        {
+            return;
+        }
         client->receivingBuffer.insert(client->receivingBuffer.end(), buffer, buffer + bytes);
 
         if (bytes == 0)
@@ -157,7 +161,7 @@ void Server::handleClient(const size_t client_index)
     }
 }
 
-void Server::startGame(const std::shared_ptr<Client>& roomOwner) const
+void Server::startGame(const std::shared_ptr<Client> &roomOwner) const
 {
     auto *room = roomOwner->room;
 
@@ -170,7 +174,7 @@ void Server::startGame(const std::shared_ptr<Client>& roomOwner) const
     room->startGame();
 }
 
-void Server::checkGuess(const std::shared_ptr<Client>& client, const char &letter)
+void Server::checkGuess(const std::shared_ptr<Client> &client, const char &letter)
 {
     auto *room = client->room;
 
@@ -225,7 +229,7 @@ void Server::checkGuess(const std::shared_ptr<Client>& client, const char &lette
     room->broadcastPlayersGameStats();
 }
 
-void Server::createNewRoom(const std::shared_ptr<Client>& client)
+void Server::createNewRoom(const std::shared_ptr<Client> &client)
 {
     auto room = std::make_unique<Room>(client);
     client->addMessageToBuffer(ServerMessageTypes::ROOM_CREATED, room->id + "|" + room->pin);
@@ -234,7 +238,7 @@ void Server::createNewRoom(const std::shared_ptr<Client>& client)
     this->rooms.push_back(std::move(room));
 }
 
-void Server::joinRoom(const std::shared_ptr<Client>& client, const std::string &id, const std::string &pin) const
+void Server::joinRoom(const std::shared_ptr<Client> &client, const std::string &id, const std::string &pin) const
 {
     const auto room = Utils::findRoom(this->rooms, id);
 
@@ -260,7 +264,7 @@ void Server::joinRoom(const std::shared_ptr<Client>& client, const std::string &
     Utils::writeDebugLog(client, "Joined room ID = " + room->id);
 }
 
-void Server::leaveRoom(const std::shared_ptr<Client>& client)
+void Server::leaveRoom(const std::shared_ptr<Client> &client)
 {
     const auto room = client->room;
 
@@ -283,7 +287,7 @@ void Server::leaveRoom(const std::shared_ptr<Client>& client)
     }
 }
 
-void Server::handleMessage(const std::shared_ptr<Client>& client, const Message *message)
+void Server::handleMessage(const std::shared_ptr<Client> &client, const Message *message)
 {
     switch (message->type)
     {
@@ -329,7 +333,7 @@ void Server::handleMessage(const std::shared_ptr<Client>& client, const Message 
     }
 }
 
-bool Server::validateNickname(const std::shared_ptr<Client>& client, const std::string &nickname) const
+bool Server::validateNickname(const std::shared_ptr<Client> &client, const std::string &nickname) const
 {
     for (auto &c : this->clients)
     {
@@ -362,7 +366,19 @@ void Server::run()
 {
     while (this->running.load())
     {
+        for (size_t i = 2; i < this->pfds.size(); i++)
+        {
+            const auto &client = this->clients[i - 2];
+            if (!client->sendingBuffer.empty())
+                this->pfds[i].events |= POLLOUT;
+            else
+                this->pfds[i].events &= ~POLLOUT;
+        }
+
         poll(this->pfds.data(), this->pfds.size(), -1);
+
+        std::cout << "POLL" << std::endl;
+
         if (this->pfds[0].revents & POLLIN)
         {
             this->acceptNewClient();
@@ -383,7 +399,7 @@ void Server::run()
     }
 }
 
-void Server::sendBufferData(const std::shared_ptr<Client>& client) const
+void Server::sendBufferData(const std::shared_ptr<Client> &client) const
 {
     const size_t minSize = std::min(static_cast<size_t>(MSG_SIZE), client->sendingBuffer.size());
     const auto buffer = new char[minSize];
