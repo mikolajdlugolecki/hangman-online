@@ -346,7 +346,7 @@ bool Server::validateNickname(const std::shared_ptr<Client> &client, const std::
     return true;
 }
 
-void Server::secondElapsed() const
+void Server::secondElapsed()
 {
     for (const auto &room : this->rooms)
     {
@@ -360,6 +360,11 @@ void Server::secondElapsed() const
     {
         client->tick();
     }
+
+    this->rooms.erase(std::remove_if(this->rooms.begin(),
+                                     this->rooms.end(),
+                                     [](const std::unique_ptr<Room> &room) { return room->isEmpty(); }),
+                      this->rooms.end());
 }
 
 void Server::run()
@@ -377,7 +382,7 @@ void Server::run()
 
         poll(this->pfds.data(), this->pfds.size(), -1);
 
-        //std::cout << "POLL" << std::endl;
+        // std::cout << "POLL" << std::endl;
 
         if (this->pfds[0].revents & POLLIN)
         {

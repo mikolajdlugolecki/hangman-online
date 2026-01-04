@@ -21,19 +21,20 @@ public:
     std::unordered_map<std::shared_ptr<Client>, std::shared_ptr<GameStats>> gameStats;
     std::chrono::steady_clock::time_point lastUpdate;
 
-    explicit Room(const std::shared_ptr<Client>& owner);
+    explicit Room(const std::shared_ptr<Client> &owner);
     ~Room();
     void broadcastMessage(ServerMessageTypes::Type type, const std::string &payload) const;
     void broadcastPlayersListLobby() const;
     void broadcastPlayersListGame() const;
     void broadcastPlayersGameStats() const;
-    void join(const std::shared_ptr<Client>& client);
+    void join(const std::shared_ptr<Client> &client);
     std::shared_ptr<Client> leave(const std::shared_ptr<Client> &client);
-    bool isClientInRoom(const std::shared_ptr<Client>& client) const;
+    bool isClientInRoom(const std::shared_ptr<Client> &client) const;
     void startGame();
     void updateGame();
     bool allClientsFinished() const;
-    std::string getStats(const std::shared_ptr<Client>& client);
+    std::string getStats(const std::shared_ptr<Client> &client);
+    bool isEmpty() const;
 
 private:
     std::shared_ptr<Client> owner;
