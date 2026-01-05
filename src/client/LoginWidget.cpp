@@ -10,6 +10,11 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent), ui(new Ui::LoginWid
     this->ui->setupUi(this);
     connect(this->ui->loginBtn, &QPushButton::clicked, this, &LoginWidget::loginButtonHit);
     connect(this->ui->loginLineEdit, &QLineEdit::returnPressed, this->ui->loginBtn, &QPushButton::click);
+
+    QRegularExpression rx("^[a-zA-Z0-9_]{3,18}$");
+    QValidator *validator = new QRegularExpressionValidator(rx, this);
+
+    ui->loginLineEdit->setValidator(validator);
 }
 
 LoginWidget::~LoginWidget()

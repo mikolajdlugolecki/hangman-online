@@ -4,6 +4,8 @@
 #include "GameState.h"
 
 #include <QWidget>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 
 namespace Ui
 {

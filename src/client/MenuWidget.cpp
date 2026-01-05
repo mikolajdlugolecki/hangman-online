@@ -13,6 +13,12 @@ MenuWidget::MenuWidget(QWidget *parent) : QWidget(parent), ui(new Ui::MenuWidget
     connect(this->ui->roomPinLineEdit, &QLineEdit::returnPressed, this->ui->joinRoomBtn, &QPushButton::click);
     connect(this->ui->roomIdLineEdit, &QLineEdit::textChanged, this, &MenuWidget::validateData);
     connect(this->ui->roomPinLineEdit, &QLineEdit::textChanged, this, &MenuWidget::validateData);
+
+    QRegularExpression rx("^[0-9_]{0,4}$");
+    QValidator *validator = new QRegularExpressionValidator(rx, this);
+
+    ui->roomIdLineEdit->setValidator(validator);
+    ui->roomPinLineEdit->setValidator(validator);
 }
 
 MenuWidget::~MenuWidget()
