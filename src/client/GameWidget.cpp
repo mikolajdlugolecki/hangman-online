@@ -54,10 +54,31 @@ void GameWidget::init(const QString &wordLength,
     }
     regenerateCharacterButtons();
 
+    setButtonsEnabled(true);
+
     drawHangman("0");
 }
 
-#include <iostream>
+void GameWidget::setButtonsEnabled(bool areEnabled)
+{
+    auto gridLayout = this->ui->charactersGridLayout;
+
+    for (int i = 0; i < gridLayout->count(); ++i)
+    {
+        QLayoutItem *item = gridLayout->itemAt(i);
+        QWidget *widget = item->widget();
+
+        if (!widget)
+        {
+            continue;
+        }
+
+        if (auto button = qobject_cast<QPushButton *>(widget))
+        {
+            button->setEnabled(areEnabled);
+        }
+    }
+}
 
 void GameWidget::gameRejoined(QString errors, QString score, QString word, QString usedCharacters)
 {
@@ -124,6 +145,7 @@ void GameWidget::regenerateCharacterButtons()
                 &QPushButton::clicked,
                 [this, button]()
                 {
+                    setButtonsEnabled(false);
                     QString letter = button->text();
                     isCharacterUsed[letter[0]] = true;
                     button->hide();
@@ -151,6 +173,8 @@ void GameWidget::guessCorrect(const QString &newWordWithHiddenChars, const QStri
 
     this->ui->maskedWordLabel->setText(transformWord(newWordWithHiddenChars));
     this->ui->scoreLabel->setText(currentScore + " / 100");
+
+    setButtonsEnabled(true);
 }
 
 void GameWidget::drawHangman(QString errors)
@@ -178,6 +202,7 @@ void GameWidget::guessIncorrect(const QString &currentScore)
     this->ui->scoreLabel->setText(currentScore + " / 100");
 
     drawHangman(currentErrors);
+    setButtonsEnabled(true);
 }
 
 void GameWidget::gameStatsReceived(const std::vector<std::string> &stats)
